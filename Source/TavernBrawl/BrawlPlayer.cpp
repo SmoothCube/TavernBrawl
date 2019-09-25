@@ -7,6 +7,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
 
+#include "BrawlerMovementComponent.h"
+
 const FName ABrawlPlayer::MoveForwardBinding("MoveForward");
 const FName ABrawlPlayer::MoveRightBinding("MoveRight");
 const FName ABrawlPlayer::FireForwardBinding("FireForward");
@@ -22,6 +24,7 @@ ABrawlPlayer::ABrawlPlayer()
 	SetRootComponent(Capsule);
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>("SkeletalMesh");
 	Mesh->SetupAttachment(Capsule);
+	MovementComponent = CreateDefaultSubobject<UBrawlerMovementComponent>("MovementComponent");
 }
 
 // Called when the game starts or when spawned
@@ -40,27 +43,28 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	// Find movement direction
 	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
-
+	if (MovementComponent)
+		MovementComponent->SetInputVector(FVector(ForwardValue, RightValue, 0));
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
-	const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
+	//const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
-	// Calculate  movement
-	const FVector Movement = MoveDirection * 1000 * DeltaTime;
+	//// Calculate  movement
+	//const FVector Movement = MoveDirection * 1000 * DeltaTime;
 
-	// If non-zero size, move this actor
-	if (Movement.SizeSquared() > 0.0f)
-	{
-		const FRotator NewRotation = Movement.Rotation();
-		FHitResult Hit(1.f);
-		RootComponent->MoveComponent(Movement, NewRotation, true, &Hit);
+	//// If non-zero size, move this actor
+	//if (Movement.SizeSquared() > 0.0f)
+	//{
+	//	const FRotator NewRotation = Movement.Rotation();
+	//	FHitResult Hit(1.f);
+	//	RootComponent->MoveComponent(Movement, NewRotation, true, &Hit);
 
-		if (Hit.IsValidBlockingHit())
-		{
-			const FVector Normal2D = Hit.Normal.GetSafeNormal2D();
-			const FVector Deflection = FVector::VectorPlaneProject(Movement, Normal2D) * (1.f - Hit.Time);
-			RootComponent->MoveComponent(Deflection, NewRotation, true);
-		}
-	}
+	//	if (Hit.IsValidBlockingHit())
+	//	{
+	//		const FVector Normal2D = Hit.Normal.GetSafeNormal2D();
+	//		const FVector Deflection = FVector::VectorPlaneProject(Movement, Normal2D) * (1.f - Hit.Time);
+	//		RootComponent->MoveComponent(Deflection, NewRotation, true);
+	//	}
+	//}
 
 }
 
@@ -76,4 +80,5 @@ void ABrawlPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	PlayerInputComponent->BindAxis(FireForwardBinding);
 	PlayerInputComponent->BindAxis(FireRightBinding);
 }
+
 

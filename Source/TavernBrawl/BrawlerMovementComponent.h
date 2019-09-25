@@ -16,13 +16,35 @@ public:
 	// Sets default values for this component's properties
 	UBrawlerMovementComponent();
 
-protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-		
+	void SetInputVector(FVector inV) { InputVector = inV; }
+
+	UPROPERTY(EditAnywhere)
+		float MaxSpeed = 2500;
+
+	bool bMoveIsAllowed = true;
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* AccelerationCurve;
+private:
+	FVector GetVelocity() { return PrevVelocity; }
+	FVector PrevVelocity{ 0,0,0 };
+	FVector InputVector;
+	UPROPERTY(EditAnywhere)
+		float AccelerationConst{ 60 };
+
+	UPROPERTY(EditAnywhere)
+		float DecelerationConst{ 50 };
+
+	float TurningBoost;
+
+	void MoveActor(float DeltaTime);
+	FVector CalculateVelocity();
+
+	AActor* Owner = nullptr;
 };

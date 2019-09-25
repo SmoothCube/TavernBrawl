@@ -30,12 +30,13 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(VisibleAnywhere)
-	class USkeletalMeshComponent* Mesh;
-
+	class USkeletalMeshComponent* Mesh = nullptr;
 
 	UPROPERTY(VisibleAnywhere)
-	class UCapsuleComponent* Capsule;
+	class UCapsuleComponent* Capsule = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	class UBrawlerMovementComponent* MovementComponent = nullptr;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

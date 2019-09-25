@@ -3,6 +3,8 @@
 
 #include "BrawlerMovementComponent.h"
 
+#include "GameFramework/Actor.h"
+#include "Curves/CurveFloat.h"
 // Sets default values for this component's properties
 UBrawlerMovementComponent::UBrawlerMovementComponent()
 {
@@ -19,6 +21,7 @@ void UBrawlerMovementComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	Owner = GetOwner();
 	// ...
 	
 }
@@ -28,7 +31,34 @@ void UBrawlerMovementComponent::BeginPlay()
 void UBrawlerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	MoveActor(DeltaTime);
 
+	AccelerationConst = AccelerationCurve->GetFloatValue(PrevVelocity.Size());
+	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::TickComponent] Velocity: %f, AccelerationConst: %f"), PrevVelocity.Size(), AccelerationConst);
 	// ...
+}
+
+
+void UBrawlerMovementComponent::MoveActor(float DeltaTime)
+{
+	if (Owner)
+	{
+		Owner->SetActorLocation(Owner->GetActorLocation() + CalculateVelocity() * DeltaTime, true);
+	}
+}
+
+FVector UBrawlerMovementComponent::CalculateVelocity()
+{
+
+	FVector Acceleration = InputVector * AccelerationConst;
+	FVector Velocity = PrevVelocity + Acceleration - PrevVelocity / DecelerationConst;
+	PrevVelocity = Velocity;
+
+	//TODO bytt til fvector, bruk ClampToMaxSize for å slippe if-testen
+
+	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
+
+
+	return Velocity;
 }
 
