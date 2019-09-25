@@ -13,10 +13,10 @@
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
 
-const FName ATavernBrawlPawn::MoveForwardBinding("MoveForward");
-const FName ATavernBrawlPawn::MoveRightBinding("MoveRight");
-const FName ATavernBrawlPawn::FireForwardBinding("FireForward");
-const FName ATavernBrawlPawn::FireRightBinding("FireRight");
+//const FName ATavernBrawlPawn::MoveForwardBinding("MoveForward");
+//const FName ATavernBrawlPawn::MoveRightBinding("MoveRight");
+//const FName ATavernBrawlPawn::FireForwardBinding("FireForward");
+//const FName ATavernBrawlPawn::FireRightBinding("FireRight");
 
 ATavernBrawlPawn::ATavernBrawlPawn()
 {	
@@ -47,17 +47,17 @@ void ATavernBrawlPawn::SetupPlayerInputComponent(class UInputComponent* PlayerIn
 	check(PlayerInputComponent);
 
 	// set up gameplay key bindings
-	PlayerInputComponent->BindAxis(MoveForwardBinding);
-	PlayerInputComponent->BindAxis(MoveRightBinding);
-	PlayerInputComponent->BindAxis(FireForwardBinding);
-	PlayerInputComponent->BindAxis(FireRightBinding);
+	//PlayerInputComponent->BindAxis(MoveForwardBinding);
+	//PlayerInputComponent->BindAxis(MoveRightBinding);
+	//PlayerInputComponent->BindAxis(FireForwardBinding);
+	//PlayerInputComponent->BindAxis(FireRightBinding);
 }
 
 void ATavernBrawlPawn::Tick(float DeltaSeconds)
 {
 	// Find movement direction
-	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
-	const float RightValue = GetInputAxisValue(MoveRightBinding);
+	const float ForwardValue = 0.f; //GetInputAxisValue(MoveForwardBinding);
+	const float RightValue = 0.f; //GetInputAxisValue(MoveRightBinding);
 
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
 	const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
@@ -81,8 +81,8 @@ void ATavernBrawlPawn::Tick(float DeltaSeconds)
 	}
 	
 	// Create fire direction vector
-	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
-	const float FireRightValue = GetInputAxisValue(FireRightBinding);
+	const float FireForwardValue = 0.f; // GetInputAxisValue(FireForwardBinding);
+	const float FireRightValue = 0.f; // GetInputAxisValue(FireRightBinding);
 	const FVector FireDirection = FVector(FireForwardValue, FireRightValue, 0.f);
 
 	// Try and fire a shot
