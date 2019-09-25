@@ -23,7 +23,11 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void SetInputVector(FVector inV) { InputVector = inV; }
+	UFUNCTION(BlueprintCallable)
+	FVector GetVelocity() { return PrevVelocity; }
+	
+
+	void SetInputVector(FVector inV) { InputVector = inV.GetSafeNormal(); }
 
 	UPROPERTY(EditAnywhere)
 		float MaxSpeed = 2500;
@@ -32,7 +36,6 @@ public:
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* AccelerationCurve;
 private:
-	FVector GetVelocity() { return PrevVelocity; }
 	FVector PrevVelocity{ 0,0,0 };
 	FVector InputVector;
 	UPROPERTY(EditAnywhere)

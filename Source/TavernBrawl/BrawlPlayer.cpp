@@ -43,8 +43,10 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	// Find movement direction
 	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
+	MovementDirection = FVector(ForwardValue, RightValue, 0);
+	MovementDirection.Normalize();
 	if (MovementComponent)
-		MovementComponent->SetInputVector(FVector(ForwardValue, RightValue, 0));
+		MovementComponent->SetInputVector(MovementDirection);
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
 	//const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
@@ -67,6 +69,7 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	//}
 
 }
+
 
 // Called to bind functionality to input
 void ABrawlPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

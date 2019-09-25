@@ -51,12 +51,12 @@ FVector UBrawlerMovementComponent::CalculateVelocity()
 {
 
 	FVector Acceleration = InputVector * AccelerationConst;
-	FVector Velocity = PrevVelocity + Acceleration - PrevVelocity / DecelerationConst;
+	FVector Velocity = PrevVelocity + Acceleration - (PrevVelocity / DecelerationConst);
+	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 	PrevVelocity = Velocity;
 
 	//TODO bytt til fvector, bruk ClampToMaxSize for å slippe if-testen
 
-	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
 
 
 	return Velocity;
