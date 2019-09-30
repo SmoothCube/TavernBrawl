@@ -85,3 +85,12 @@ void ABrawlPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
+float ABrawlPlayer::GetSpeed()
+{ 
+	return MovementComponent->GetSpeed(); 
+}
+
+void ABrawlPlayer::SetSimulatePhysics(bool inPhysics)
+{
+	Mesh->SetSimulatePhysics(inPhysics);
+}

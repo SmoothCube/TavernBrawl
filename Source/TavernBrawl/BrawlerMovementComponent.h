@@ -26,11 +26,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector GetVelocity() { return PrevVelocity; }
 	
+	float GetSpeed() { return PrevVelocity.Size(); }
 
 	void SetInputVector(FVector inV) { InputVector = inV.GetSafeNormal(); }
 
 	UPROPERTY(EditAnywhere)
-		float MaxSpeed = 2500;
+		float MaxSpeed = 1000;
+
+	UPROPERTY(EditAnywhere)
+	float RecoveryTime = 1.0f;
 
 	bool bMoveIsAllowed = true;
 	UPROPERTY(EditAnywhere)
@@ -39,15 +43,21 @@ private:
 	FVector PrevVelocity{ 0,0,0 };
 	FVector InputVector;
 	UPROPERTY(EditAnywhere)
-		float AccelerationConst{ 60 };
+	float AccelerationConst{ 60 };
 
 	UPROPERTY(EditAnywhere)
-		float DecelerationConst{ 50 };
+	float DecelerationConst{ 50 };
 
 	float TurningBoost;
+	bool bAllowedToMove = true;
 
 	void MoveActor(float DeltaTime);
 	FVector CalculateVelocity();
+	
+	void Fall(FVector& Velocity);
+	void GetUp();
 
-	AActor* Owner = nullptr;
+	class ABrawlPlayer* Owner = nullptr;
+
+	FTimerHandle TH_FallHandle;
 };

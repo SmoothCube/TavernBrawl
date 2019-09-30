@@ -41,6 +41,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector GetMovemetDirection() { return MovementDirection; }
 
+	UFUNCTION(BlueprintCallable)
+	float GetSpeed();
+	
+	void SetSimulatePhysics(bool inPhysics);
+
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 private:
