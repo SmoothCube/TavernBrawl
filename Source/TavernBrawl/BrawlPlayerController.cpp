@@ -3,3 +3,7 @@
 
 #include "BrawlPlayerController.h"
 
+void ABrawlPlayerController::RespawnPlayer()
+{
+	GetOwner()->Destroy();
+}

@@ -13,5 +13,6 @@ UCLASS()
 class TAVERNBRAWL_API ABrawlPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+public:
+	void RespawnPlayer();
 };

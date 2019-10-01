@@ -31,7 +31,7 @@ public:
 	void SetInputVector(FVector inV) { InputVector = inV.GetSafeNormal(); }
 
 	UPROPERTY(EditAnywhere)
-		float MaxSpeed = 1000;
+	float MaxSpeed = 1000;
 
 	UPROPERTY(EditAnywhere)
 	float RecoveryTime = 1.0f;

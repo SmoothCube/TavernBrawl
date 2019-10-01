@@ -35,12 +35,12 @@ void UBrawlerMovementComponent::BeginPlay()
 void UBrawlerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	if(bAllowedToMove)
+	if(bAllowedToMove && Owner->HasLocalNetOwner())
 		MoveActor(DeltaTime);
 
 
 	//AccelerationConst = AccelerationCurve->GetFloatValue(PrevVelocity.Size());
-	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::TickComponent] Velocity: %f, AccelerationConst: %f"), PrevVelocity.Size(), AccelerationConst);
+	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::TickComponent] Velocity: %f, AccelerationConst: %f"), PrevVelocity.Size(), AccelerationConst);
 	// ...
 }
 
@@ -56,14 +56,14 @@ void UBrawlerMovementComponent::MoveActor(float DeltaTime)
 
 FVector UBrawlerMovementComponent::CalculateVelocity()
 {
-
-	FVector Acceleration = InputVector * AccelerationConst;
-	FVector Velocity = PrevVelocity + Acceleration - (PrevVelocity / DecelerationConst);
-	Velocity = Velocity.GetClampedToMaxSize(MaxSpeed);
-
-	if (Velocity.SizeSquared() > MaxSpeed * MaxSpeed)
+	FVector SafeVector = InputVector.GetSafeNormal();
+	if (SafeVector.IsNearlyZero())
+		SafeVector = Owner->GetActorForwardVector();
+	FVector Acceleration = SafeVector * AccelerationConst;
+	FVector Velocity = PrevVelocity + Acceleration;
+	Owner->SetActorRotation(Velocity.Rotation());
+	if (Velocity.Size() >MaxSpeed)
 	{
-
 		Fall(Velocity);
 		UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Falling"));
 	}
@@ -79,8 +79,9 @@ void UBrawlerMovementComponent::Fall(FVector& Velocity)
 	bAllowedToMove = false;
 	if (Owner)
 	{
-		//Owner->SetSimulatePhysics(true);
-		Owner->SetActorRotation(FRotator(-90, 0, 0));
+		//Owner->SetActorRotation(FRotator(-90, 0, 0));
+		Owner->Mesh->SetSimulatePhysics(true);
+		Owner->Mesh->WakeAllRigidBodies();
 	}
 	GetWorld()->GetTimerManager().SetTimer(
 		TH_FallHandle,
@@ -91,7 +92,7 @@ void UBrawlerMovementComponent::Fall(FVector& Velocity)
 	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::Fall]: Falling"));
 
 
-	//Comfun:  Nye Funcom
+
 }
 
 void UBrawlerMovementComponent::GetUp()
@@ -100,7 +101,11 @@ void UBrawlerMovementComponent::GetUp()
 	{
 		//Owner->SetSimulatePhysics(false);
 		//Owner->Mesh->SetRelativeLocation(Owner->GetActorLocation());
-		Owner->SetActorRotation(FRotator(0,0,0));
+		//Owner->SetActorRotation(FRotator(0,0,0));
+
+		Owner->Mesh->PutAllRigidBodiesToSleep();
+		Owner->Mesh->SetSimulatePhysics(false);
+		//Owner->Mesh->
 	}
 	bAllowedToMove = true;
 	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::GetUp]: Getting Up"));
