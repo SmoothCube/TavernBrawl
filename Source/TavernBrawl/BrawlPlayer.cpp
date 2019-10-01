@@ -89,8 +89,3 @@ float ABrawlPlayer::GetSpeed()
 { 
 	return MovementComponent->GetSpeed(); 
 }
-
-void ABrawlPlayer::SetSimulatePhysics(bool inPhysics)
-{
-	Mesh->SetSimulatePhysics(inPhysics);
-}

@@ -39,6 +39,9 @@ public:
 	bool bMoveIsAllowed = true;
 	UPROPERTY(EditAnywhere)
 	class UCurveFloat* AccelerationCurve;
+
+	UFUNCTION(BlueprintCallable)
+	void Fall(FVector& Velocity);
 private:
 	FVector PrevVelocity{ 0,0,0 };
 	FVector InputVector;
@@ -54,7 +57,8 @@ private:
 	void MoveActor(float DeltaTime);
 	FVector CalculateVelocity();
 	
-	void Fall(FVector& Velocity);
+
+
 	void GetUp();
 
 	class ABrawlPlayer* Owner = nullptr;

@@ -3,12 +3,14 @@
 
 #include "BrawlerMovementComponent.h"
 
-#include "BrawlPlayer.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "Curves/CurveFloat.h"
 #include "Components/SkeletalMeshComponent.h"
+
+#include "BrawlPlayer.h"
+#include "BrawlPlayerController.h"
 // Sets default values for this component's properties
 UBrawlerMovementComponent::UBrawlerMovementComponent()
 {
@@ -40,7 +42,7 @@ void UBrawlerMovementComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 
 	//AccelerationConst = AccelerationCurve->GetFloatValue(PrevVelocity.Size());
-	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::TickComponent] Velocity: %f, AccelerationConst: %f"), PrevVelocity.Size(), AccelerationConst);
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::TickComponent] Velocity: %f, AccelerationConst: %f"), PrevVelocity.Size(), AccelerationConst);
 	// ...
 }
 
@@ -99,15 +101,18 @@ void UBrawlerMovementComponent::GetUp()
 {
 	if (Owner)
 	{
+
+		Cast<ABrawlPlayerController>(Owner->GetController())->RespawnPlayer();
 		//Owner->SetSimulatePhysics(false);
 		//Owner->Mesh->SetRelativeLocation(Owner->GetActorLocation());
 		//Owner->SetActorRotation(FRotator(0,0,0));
 
-		Owner->Mesh->PutAllRigidBodiesToSleep();
-		Owner->Mesh->SetSimulatePhysics(false);
-		//Owner->Mesh->
+	//	Owner->Mesh->PutAllRigidBodiesToSleep();
+	//	Owner->Mesh->SetSimulatePhysics(false);
+	//	//Owner->Mesh->
+	//}
 	}
-	bAllowedToMove = true;
-	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::GetUp]: Getting Up"));
+	//bAllowedToMove = true;
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::GetUp]: Getting Up"));
 }
 
