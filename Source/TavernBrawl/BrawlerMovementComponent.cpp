@@ -58,12 +58,12 @@ void UBrawlerMovementComponent::MoveActor(float DeltaTime)
 
 FVector UBrawlerMovementComponent::CalculateVelocity()
 {
-	FVector SafeVector = InputVector.GetSafeNormal();
-	if (SafeVector.IsNearlyZero())
-		SafeVector = Owner->GetActorForwardVector();
+	FVector SafeVector = InputVector;
+
 	FVector Acceleration = SafeVector * AccelerationConst;
 	FVector Velocity = PrevVelocity + Acceleration;
-	Owner->SetActorRotation(Velocity.Rotation());
+	Owner->SetActorRotation(RotationVector.Rotation());
+
 	if (Velocity.Size() >MaxSpeed)
 	{
 		Fall(Velocity);

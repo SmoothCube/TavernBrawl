@@ -25,10 +25,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetVelocity() { return PrevVelocity; }
+
+
+	UFUNCTION(BlueprintCallable)
+	FVector GetRotation() { return RotationVector; }
 	
 	float GetSpeed() { return PrevVelocity.Size(); }
 
 	void SetInputVector(FVector inV) { InputVector = inV.GetSafeNormal(); }
+	void SetRotationVector(FVector inV) { RotationVector = inV.GetSafeNormal(); }
 
 	UPROPERTY(EditAnywhere)
 	float MaxSpeed = 1000;
@@ -45,6 +50,7 @@ public:
 private:
 	FVector PrevVelocity{ 0,0,0 };
 	FVector InputVector;
+	FVector RotationVector;
 	UPROPERTY(EditAnywhere)
 	float AccelerationConst{ 60 };
 

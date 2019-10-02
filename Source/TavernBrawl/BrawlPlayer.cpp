@@ -43,10 +43,21 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	// Find movement direction
 	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
+
+	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
+	const float FireRightValue = GetInputAxisValue(FireRightBinding);
+
 	MovementDirection = FVector(ForwardValue, RightValue, 0);
 	MovementDirection.Normalize();
+
+	FVector RotationDirection = FVector(FireForwardValue, FireRightValue, 0);
+	RotationDirection.Normalize();
 	if (MovementComponent)
+	{
 		MovementComponent->SetInputVector(MovementDirection);
+		MovementComponent->SetRotationVector(RotationDirection);
+
+	}
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
 	//const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
