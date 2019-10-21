@@ -32,7 +32,7 @@ public:
 	
 	float GetSpeed() { return PrevVelocity.Size(); }
 
-	void SetInputVector(FVector inV) { InputVector = inV.GetSafeNormal(); }
+	void SetInputVector(FVector inV) { InputVector = inV; }
 	void SetRotationVector(FVector inV) { RotationVector = inV.GetSafeNormal(); }
 
 	UPROPERTY(EditAnywhere)
@@ -51,6 +51,7 @@ private:
 	FVector PrevVelocity{ 0,0,0 };
 	FVector InputVector;
 	FVector RotationVector;
+
 	UPROPERTY(EditAnywhere)
 	float AccelerationConst{ 60 };
 

@@ -47,6 +47,6 @@ public:
 	void GetUp();
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-private:
 	FVector MovementDirection{ 0,0,0 };
+private:
 };

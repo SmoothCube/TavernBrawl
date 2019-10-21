@@ -47,8 +47,11 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
 	const float FireRightValue = GetInputAxisValue(FireRightBinding);
 
+	//MovementDirection.X += ForwardValue;
+	//MovementDirection.Y += RightValue;
 	MovementDirection = FVector(ForwardValue, RightValue, 0);
-	MovementDirection.Normalize();
+	if(MovementDirection.SizeSquared() > 1.0f)
+		MovementDirection.Normalize();
 
 	FVector RotationDirection = FVector(FireForwardValue, FireRightValue, 0);
 	RotationDirection.Normalize();

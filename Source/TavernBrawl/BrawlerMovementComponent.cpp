@@ -58,15 +58,17 @@ void UBrawlerMovementComponent::MoveActor(float DeltaTime)
 
 FVector UBrawlerMovementComponent::CalculateVelocity()
 {
-	FVector SafeVector = InputVector;
+	//FVector SafeVector = InputVector;
 
-	FVector Acceleration = SafeVector * AccelerationConst;
-	FVector Velocity = PrevVelocity + Acceleration;
+	//FVector Acceleration = SafeVector * AccelerationConst;
+	FVector Velocity = (PrevVelocity + InputVector); //  *(1 - (PrevVelocity.Size() / MaxSpeed));
 	Owner->SetActorRotation(RotationVector.Rotation());
 
-	if (Velocity.Size() >MaxSpeed)
+	if (Velocity.SizeSquared() >MaxSpeed*MaxSpeed)
 	{
-		Fall(Velocity);
+		Velocity = FVector(0);
+		Owner->MovementDirection = FVector(0);
+		//Fall(Velocity);
 		UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Falling"));
 	}
 
