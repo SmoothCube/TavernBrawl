@@ -6,7 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "BrawlerMovementComponent.generated.h"
 
-
+class UCurveFloat;
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class TAVERNBRAWL_API UBrawlerMovementComponent : public UActorComponent
 {
@@ -30,7 +30,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FVector GetRotation() { return RotationVector; }
 	
-	float GetSpeed() { return PrevVelocity.Size(); }
+	float GetSpeed() { return SpeedCurve->GetFloatValue(LeanVector.Size()); }
 
 	void SetInputVector(FVector inV) { InputVector = inV; }
 	void SetRotationVector(FVector inV) { RotationVector = inV.GetSafeNormal(); }
@@ -43,14 +43,19 @@ public:
 
 	bool bMoveIsAllowed = true;
 	UPROPERTY(EditAnywhere)
-	class UCurveFloat* AccelerationCurve;
+	class UCurveFloat* SpeedCurve;
+
+	UPROPERTY(EditAnywhere)
+	class UCurveFloat* DecelerationCurve;
 
 	UFUNCTION(BlueprintCallable)
 	void Fall(FVector& Velocity);
 private:
 	FVector PrevVelocity{ 0,0,0 };
-	FVector InputVector;
-	FVector RotationVector;
+	FVector InputVector{ 0,0,0 };
+	FVector PrevInputVector{ 0,0,0 };
+	FVector RotationVector{ 0,0,0 };
+	FVector LeanVector{ 0,0,0 };
 
 	UPROPERTY(EditAnywhere)
 	float AccelerationConst{ 60 };
@@ -64,8 +69,6 @@ private:
 	void MoveActor(float DeltaTime);
 	FVector CalculateVelocity();
 	
-
-
 	void GetUp();
 
 	class ABrawlPlayer* Owner = nullptr;

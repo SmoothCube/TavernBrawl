@@ -51,29 +51,56 @@ void UBrawlerMovementComponent::MoveActor(float DeltaTime)
 {
 	if (Owner)
 	{
-		Owner->SetActorLocation(Owner->GetActorLocation() + CalculateVelocity() * DeltaTime, true);
+		Owner->AddActorWorldOffset(CalculateVelocity() * DeltaTime, true);
+		
 		//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::MoveActor]: Moving Actor"));
 	}
 }
 
 FVector UBrawlerMovementComponent::CalculateVelocity()
 {
-	//FVector SafeVector = InputVector;
 
-	//FVector Acceleration = SafeVector * AccelerationConst;
-	FVector Velocity = (PrevVelocity + InputVector); //  *(1 - (PrevVelocity.Size() / MaxSpeed));
+	//float Deceleration = 0;
+	//if (DecelerationCurve)
+	//	Deceleration = DecelerationCurve->GetFloatValue(FMath::Abs((LeanVector.GetSafeNormal() - PrevInputVector).Size()));
+	//else
+	//	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Speed Curve Not Set!"));
+
+	float Speed = 0;
+	if (SpeedCurve)
+		Speed = SpeedCurve->GetFloatValue(LeanVector.Size());
+	else
+		UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Speed Curve Not Set!"));
+
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: DecelerationCurve.Speed! %f"), FMath::Abs((LeanVector.GetSafeNormal() - PrevInputVector).Size()));
+	if (InputVector.IsNearlyZero())
+	{
+		LeanVector -= LeanVector.GetSafeNormal() * DecelerationConst;
+		//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Decelerating! %f"), FMath::Abs((InputVector - PrevInputVector).Size()));
+	}
+	else
+	{
+		LeanVector += InputVector;
+	}
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Input Vector!"));
+
 	Owner->SetActorRotation(RotationVector.Rotation());
 
-	if (Velocity.SizeSquared() >MaxSpeed*MaxSpeed)
-	{
-		Velocity = FVector(0);
-		Owner->MovementDirection = FVector(0);
-		//Fall(Velocity);
-		UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Falling"));
-	}
+
+	FVector Velocity = (LeanVector.GetSafeNormal() * Speed);// -LeanVector.GetSafeNormal() * Deceleration;
+
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Speed: %f, LeanVector: (%f, %f, %f)"), Speed, LeanVector.X, LeanVector.Y, LeanVector.Z);
+	//UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: SpeedCurve: %f"), Speed);
+	//if (Velocity.SizeSquared() >MaxSpeed*MaxSpeed)
+	//{
+	//	Velocity = FVector(0);
+	//	Owner->MovementDirection = FVector(0);
+	//	//Fall(Velocity);
+	//	UE_LOG(LogTemp, Warning, TEXT("[UBrawlerMovementComponent::CalculateVelocity]: Falling"));
+	//}
 
 	PrevVelocity = Velocity;
-
+	PrevInputVector = InputVector;
 	return Velocity;
 }
 

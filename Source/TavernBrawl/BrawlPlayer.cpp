@@ -31,7 +31,6 @@ ABrawlPlayer::ABrawlPlayer()
 void ABrawlPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -59,6 +58,7 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	{
 		MovementComponent->SetInputVector(MovementDirection);
 		MovementComponent->SetRotationVector(RotationDirection);
+
 
 	}
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
