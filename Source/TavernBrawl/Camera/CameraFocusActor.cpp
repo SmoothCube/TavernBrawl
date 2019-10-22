@@ -49,7 +49,8 @@ void ACameraFocusActor::Tick(float DeltaTime)
 
 	for (const auto PlayerController : Players)
 	{
-		auto Pawn = Cast<ABrawlPlayer>(PlayerController->GetPawn());
+		auto Pawn = PlayerController->GetPawn();
+		if (!Pawn) { UE_LOG(LogTemp, Warning, TEXT("Missing Pawn for PlayerController: %s"), *GetNameSafe(this)); continue; }
 		sum += Pawn->GetActorLocation();
 		auto distance = FVector::Dist(Pawn->GetActorLocation(), GetActorLocation());
 		if (distance > distanceToFurthestPlayer)
