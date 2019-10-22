@@ -28,6 +28,9 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void GetPunched(FVector punchStrength);
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class USphereComponent* PunchSphere = nullptr;
+
 private:
 	
 	// Static names for axis bindings
@@ -41,8 +44,10 @@ private:
 	void HandleRotationInput();
 	void Fall();
 	void GetUp();
+	void Punch();
 
-
+	UFUNCTION()
+	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UPROPERTY(EditAnywhere)
 	float RecoveryTime= 0.5;

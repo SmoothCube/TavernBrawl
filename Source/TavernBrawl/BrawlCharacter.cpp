@@ -7,6 +7,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SphereComponent.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
 
@@ -22,14 +23,16 @@ ABrawlCharacter::ABrawlCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	PunchSphere = CreateDefaultSubobject<USphereComponent>("PunchSphere");
+	PunchSphere->SetupAttachment(GetMesh(), "sphereCollisionHere");
 }
 
 // Called when the game starts or when spawned
 void ABrawlCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	PunchSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPunchSphereOverlapBegin);
+
 }
 
 // Called every frame
@@ -50,6 +53,29 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	//	Fall();
 	//}
 }
+
+void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
+	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
+	if (OtherPlayer)
+	{
+		OtherPlayer->GetPunched(GetVelocity()*10);
+	}
+}
+
+// Called to bind functionality to input
+void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+{
+	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+	PlayerInputComponent->BindAxis(MoveForwardBinding);
+	PlayerInputComponent->BindAxis(MoveRightBinding);
+	PlayerInputComponent->BindAxis(RotateForwardBinding);
+	PlayerInputComponent->BindAxis(RotateRightBinding);
+	PlayerInputComponent->BindAction("Punch", IE_Released, this, &ABrawlCharacter::Punch);
+}
+
 
 void ABrawlCharacter::HandleMovementInput()
 {
@@ -93,20 +119,16 @@ void ABrawlCharacter::GetUp()
 	bIsMovementAllowed = true;
 }
 
-// Called to bind functionality to input
-void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(MoveForwardBinding);
-	PlayerInputComponent->BindAxis(MoveRightBinding);
-	PlayerInputComponent->BindAxis(RotateForwardBinding);
-	PlayerInputComponent->BindAxis(RotateRightBinding);
+void ABrawlCharacter::Punch()
+{
+	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ABrawlCharacter::GetPunched(FVector punchStrength)
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] Someone Got Punched: %s"), *GetNameSafe(this));
-	GetMovementComponent()->AddInputVector(punchStrength,true);
+	GetMovementComponent()->AddInputVector(punchStrength, true);
 }
 
