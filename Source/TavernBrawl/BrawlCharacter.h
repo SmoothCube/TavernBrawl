@@ -15,20 +15,26 @@ public:
 	// Sets default values for this character's properties
 	ABrawlCharacter();
 
-	// Static names for axis bindings
-	static const FName MoveForwardBinding;
-	static const FName MoveRightBinding;
-	static const FName RotateForwardBinding;
-	static const FName RotateRightBinding;
+
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
+
+	UFUNCTION(BlueprintCallable)
+	void GetPunched(FVector punchStrength);
+
 private:
 	
+	// Static names for axis bindings
+	static const FName MoveForwardBinding;
+	static const FName MoveRightBinding;
+	static const FName RotateForwardBinding;
+	static const FName RotateRightBinding;
 
 	//How much you have to tilt the right stick before the character rotates to that direction
 	void HandleMovementInput();
@@ -48,4 +54,5 @@ private:
 	bool bIsMovementAllowed = true;
 
 	FTimerHandle TH_FallHandle;
+
 };

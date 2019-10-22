@@ -44,7 +44,9 @@ private:
 	TArray<ABrawlPlayerController*> Players;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Variables")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 		float SmallestSpringArmLength = 300.f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	float BorderWidth = 2.0f;
 };

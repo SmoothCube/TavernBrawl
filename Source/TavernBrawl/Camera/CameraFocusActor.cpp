@@ -61,11 +61,11 @@ void ACameraFocusActor::Tick(float DeltaTime)
 
 	if (distanceToFurthestPlayer > SmallestSpringArmLength)
 	{
-	SpringArm->TargetArmLength = distanceToFurthestPlayer * 2;
+	SpringArm->TargetArmLength = distanceToFurthestPlayer * BorderWidth;
 	}
 	else
 	{
-		SpringArm->TargetArmLength = SmallestSpringArmLength;
+		SpringArm->TargetArmLength = SmallestSpringArmLength*BorderWidth;
 	}
 
 	SetActorLocation(sum);

@@ -104,3 +104,9 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(RotateRightBinding);
 }
 
+void ABrawlCharacter::GetPunched(FVector punchStrength)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] Someone Got Punched: %s"), *GetNameSafe(this));
+	GetMovementComponent()->AddInputVector(punchStrength,true);
+}
+
