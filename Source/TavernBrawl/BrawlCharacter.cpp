@@ -58,7 +58,7 @@ void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedC
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
 	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
-	if (OtherPlayer)
+	if (OtherPlayer != this && OtherPlayer != nullptr)
 	{
 		OtherPlayer->GetPunched(GetVelocity()*10);
 	}
