@@ -35,6 +35,8 @@ void ABrawlCharacter::BeginPlay()
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	InitialRelativeMeshLocation = GetMesh()->RelativeLocation;
+	InitialRelativeMeshRotation = GetMesh()->RelativeRotation;
 }
 
 // Called every frame
@@ -44,8 +46,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 
 	HandleMovementInput();
 	HandleRotationInput();
-
-
 
 	//float Speed = GetMovementComponent()->Velocity.Size();
 	////UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Tick] Speed: %f"), Speed);
@@ -100,7 +100,7 @@ void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedC
 	if (OtherActor != this && OtherPlayer != nullptr)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
-		OtherPlayer->GetPunched(GetVelocity() * 100);
+		OtherPlayer->GetPunched(GetVelocity() * 1000);
 	}
 }
 
@@ -131,16 +131,17 @@ void ABrawlCharacter::PunchEnd()
 void ABrawlCharacter::GetPunched(FVector punchStrength)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
-	GetMovementComponent()->AddInputVector(punchStrength, true);
-	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	//GetMesh()->SetSimulatePhysics(true);
-	//GetMesh()->AddForce(punchStrength, "head");
+//	GetMovementComponent()->AddInputVector(punchStrength, true);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->AddForce(punchStrength, "head");
 
 	//Fall only disables movement and sets timer for getting up atm. needs to be changed later.
 	//TODO either refactor GetPunched code into Fall(), 
 	//or make another function that fall and GetPunched both can use for setting the timer and movemnet
-	//Fall();
+	Fall();
 
 
 }
@@ -163,10 +164,20 @@ void ABrawlCharacter::GetUp()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
 
+	//Note that if this component is currently attached to something, beginning simulation will detach it.
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget,false);
+	GetMesh()->AttachToComponent(GetRootComponent(), Rule);
+
+
+	//GetMesh()->SetWorldLocationAndRotationNoPhysics(GetActorLocation() + FVector(0, 0, -80), GetActorRotation() + FRotator(0, -90, 0));
+	GetMesh()->SetRelativeLocationAndRotation(InitialRelativeMeshLocation, InitialRelativeMeshRotation);
+	
+	//GetMesh()->SetRelativeLocation(InitialRelativeMeshLocation);
+	//GetMesh()->SetRelativeRotation(InitialRelativeMeshRotation);
 	bIsMovementAllowed = true;
-	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//GetMesh()->SetSimulatePhysics(false);
 }
 
 

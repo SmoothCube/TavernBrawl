@@ -70,4 +70,7 @@ private:
 	FTimerHandle TH_FallHandle;
 	FTimerHandle TH_PunchHandle;
 
+
+	FVector InitialRelativeMeshLocation;
+	FRotator InitialRelativeMeshRotation;
 };
