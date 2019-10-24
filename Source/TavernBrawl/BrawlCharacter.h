@@ -28,6 +28,10 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void GetPunched(FVector punchStrength);
 
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPunching() { return bIsPunching; }
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USphereComponent* PunchSphere = nullptr;
 
@@ -45,6 +49,7 @@ private:
 	void Fall();
 	void GetUp();
 	void Punch();
+	void PunchEnd();
 
 	UFUNCTION()
 	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -53,11 +58,16 @@ private:
 	float RecoveryTime= 0.5;
 
 	UPROPERTY(EditAnywhere)
+	float PunchLength = 0.3;
+
+	UPROPERTY(EditAnywhere)
 	float RotationTiltCutoff = 0.5;
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
 
 	bool bIsMovementAllowed = true;
+	bool bIsPunching = false;
 
 	FTimerHandle TH_FallHandle;
+	FTimerHandle TH_PunchHandle;
 
 };

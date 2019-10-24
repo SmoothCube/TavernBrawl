@@ -32,7 +32,9 @@ void ABrawlCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	PunchSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPunchSphereOverlapBegin);
-
+	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 }
 
 // Called every frame
@@ -54,15 +56,7 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	//}
 }
 
-void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
-	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
-	if (OtherPlayer != this && OtherPlayer != nullptr)
-	{
-		OtherPlayer->GetPunched(GetVelocity()*10);
-	}
-}
+
 
 // Called to bind functionality to input
 void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -73,7 +67,7 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(MoveRightBinding);
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
-	PlayerInputComponent->BindAction("Punch", IE_Released, this, &ABrawlCharacter::Punch);
+	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &ABrawlCharacter::Punch);
 }
 
 
@@ -100,6 +94,57 @@ void ABrawlCharacter::HandleRotationInput()
 	}
 }
 
+void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
+	if (OtherActor != this && OtherPlayer != nullptr)
+	{
+		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
+		OtherPlayer->GetPunched(GetVelocity() * 100);
+	}
+}
+
+void ABrawlCharacter::Punch()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
+
+	PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	bIsPunching = true;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		TH_FallHandle,
+		this,
+		&ABrawlCharacter::PunchEnd,
+		PunchLength,
+		false);
+}
+
+void ABrawlCharacter::PunchEnd()
+{
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Player Punch End: %s"), *GetNameSafe(this));
+
+	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	bIsPunching = false;
+}
+
+void ABrawlCharacter::GetPunched(FVector punchStrength)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
+	GetMovementComponent()->AddInputVector(punchStrength, true);
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	//GetMesh()->SetSimulatePhysics(true);
+	//GetMesh()->AddForce(punchStrength, "head");
+
+	//Fall only disables movement and sets timer for getting up atm. needs to be changed later.
+	//TODO either refactor GetPunched code into Fall(), 
+	//or make another function that fall and GetPunched both can use for setting the timer and movemnet
+	//Fall();
+
+
+}
+
 void ABrawlCharacter::Fall()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
@@ -116,19 +161,14 @@ void ABrawlCharacter::Fall()
 
 void ABrawlCharacter::GetUp()
 {
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
+
 	bIsMovementAllowed = true;
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	//GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//GetMesh()->SetSimulatePhysics(false);
 }
 
 
-void ABrawlCharacter::Punch()
-{
-	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-}
 
-void ABrawlCharacter::GetPunched(FVector punchStrength)
-{
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] Someone Got Punched: %s"), *GetNameSafe(this));
-	GetMovementComponent()->AddInputVector(punchStrength, true);
-}
 
