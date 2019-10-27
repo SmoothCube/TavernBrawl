@@ -21,6 +21,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	UFUNCTION(BlueprintCallable)
+	FVector FindLeanVector();
+
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
@@ -44,7 +47,7 @@ private:
 	static const FName RotateRightBinding;
 
 	//How much you have to tilt the right stick before the character rotates to that direction
-	void HandleMovementInput();
+	void HandleMovementInput(float DeltaTime);
 	void HandleRotationInput();
 	void Fall();
 	void GetUp();
@@ -62,7 +65,11 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	float RotationTiltCutoff = 0.5;
+
+	UPROPERTY(EditAnywhere)
+	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
+	FVector FallVector{ 0.f,0.f,0.f };
 
 	bool bIsMovementAllowed = true;
 	bool bIsPunching = false;

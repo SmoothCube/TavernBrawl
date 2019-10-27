@@ -23,6 +23,7 @@ ABrawlCharacter::ABrawlCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	//SetRootComponent(GetCapsuleComponent());
 	PunchSphere = CreateDefaultSubobject<USphereComponent>("PunchSphere");
 	PunchSphere->SetupAttachment(GetMesh(), "sphereCollisionHere");
 }
@@ -44,9 +45,8 @@ void ABrawlCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	HandleMovementInput();
+	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
-
 	//float Speed = GetMovementComponent()->Velocity.Size();
 	////UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Tick] Speed: %f"), Speed);
 	//if (Speed >= GetMovementComponent()->GetMaxSpeed())
@@ -70,13 +70,37 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &ABrawlCharacter::Punch);
 }
 
-
-void ABrawlCharacter::HandleMovementInput()
+void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 {
 	FVector InputVector(GetInputAxisValue(MoveForwardBinding), GetInputAxisValue(MoveRightBinding), 0);
 
 	if (bIsMovementAllowed && !InputVector.IsNearlyZero())
+	{
+		InputVector.Normalize();
 		GetMovementComponent()->AddInputVector(InputVector);
+		FallVector += InputVector;
+		float TimeBeforeFallSquared = TimeBeforeFall;	//Just so we can compare to SizeSquared, as this is cheaper
+		float FallVectorSizeSquared = FallVector.Size();
+		if (FallVectorSizeSquared >= TimeBeforeFallSquared)
+		{
+			Fall();
+		}
+		else if (FallVectorSizeSquared >= TimeBeforeFallSquared / 2)
+		{
+			
+			//PlayControllerVibration(FallVectorSizeSquared / TimeBeforeFallSquared);
+			float Strength = FallVectorSizeSquared / TimeBeforeFallSquared;
+			
+			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
+			c->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
+			UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
+		}
+		else
+		{
+			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
+			FallVector = FVector(0)
+		}
+	}
 }
 
 void ABrawlCharacter::HandleRotationInput()
@@ -130,25 +154,20 @@ void ABrawlCharacter::PunchEnd()
 
 void ABrawlCharacter::GetPunched(FVector punchStrength)
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
+//	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
 //	GetMovementComponent()->AddInputVector(punchStrength, true);
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-	GetMesh()->SetSimulatePhysics(true);
-	GetMesh()->AddForce(punchStrength, "head");
-
-	//Fall only disables movement and sets timer for getting up atm. needs to be changed later.
-	//TODO either refactor GetPunched code into Fall(), 
-	//or make another function that fall and GetPunched both can use for setting the timer and movemnet
 	Fall();
-
-
+	GetMesh()->AddForce(punchStrength, "head");
 }
 
 void ABrawlCharacter::Fall()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
+	FVector Velocity = GetVelocity();
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetSimulatePhysics(true);
 
 	GetWorld()->GetTimerManager().SetTimer(
 		TH_FallHandle,
@@ -157,7 +176,10 @@ void ABrawlCharacter::Fall()
 		RecoveryTime,
 		false);
 	bIsMovementAllowed = false;
-
+	GetMesh()->AddForce(Velocity, "head");
+	ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
+	c->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
+	GetMovementComponent()->StopActiveMovement();
 }
 
 void ABrawlCharacter::GetUp()
@@ -180,6 +202,10 @@ void ABrawlCharacter::GetUp()
 	bIsMovementAllowed = true;
 }
 
-
-
-
+FVector ABrawlCharacter::FindLeanVector()
+{
+	FVector LeanVector = GetActorRotation().RotateVector(InitialRelativeMeshRotation.RotateVector(GetVelocity()));
+	//LeanVector = InitialRelativeMeshRotation.RotateVector(LeanVector);
+	InitialRelativeMeshRotation.RotateVector(GetVelocity());
+	return FVector(0);
+}
