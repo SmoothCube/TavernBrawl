@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "BrawlCharacter.generated.h"
-
 class ABrawlPlayerController;
 UCLASS()
 class TAVERNBRAWL_API ABrawlCharacter : public ACharacter
@@ -58,19 +57,31 @@ private:
 	UFUNCTION()
 	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Variables")
 	float RecoveryTime= 0.5;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Variables")
 	float PunchLength = 0.3;
 
-	UPROPERTY(EditAnywhere)
-	float RotationTiltCutoff = 0.5;
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float MaxLeanValue = 90.f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float BrakeMultiplier = 1.f;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float RotationTiltCutoff = 0.5f;
+	
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float StopSpeed= 0.1f;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
+	
+	
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
 	FVector FallVector{ 0.f,0.f,0.f };
+	
 
 	bool bIsPunching = false;
 	bool bHasFallen = false;
