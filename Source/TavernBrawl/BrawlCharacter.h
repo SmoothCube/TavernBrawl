@@ -78,7 +78,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 	
-	
+	float CurrentFallTimer = 0.f;
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
 	FVector FallVector{ 0.f,0.f,0.f };
 	
