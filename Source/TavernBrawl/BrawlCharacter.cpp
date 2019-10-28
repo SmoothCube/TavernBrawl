@@ -12,6 +12,8 @@
 #include "Engine/World.h"
 
 #include "BrawlPlayerController.h"
+#include "Subsystems/ScoreSubsystem.h"
+#include "Engine/LocalPlayer.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -49,6 +51,11 @@ void ABrawlCharacter::BeginPlay()
 void ABrawlCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// This is a temporary fix for our casting issue
+	if (!BrawlPlayerController)
+		BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
+
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
@@ -177,6 +184,20 @@ void ABrawlCharacter::GetPunched(FVector punchStrength)
 	PunchEnd();
 	Fall();
 	GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
+
+	
+	if (BrawlPlayerController)
+	{
+		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+		subsystem->DecrementHealth();
+	}
+	else
+	{
+		ABrawlPlayerController* TempPlayerController = Cast<ABrawlPlayerController>(GetController());
+		UScoreSubsystem* subsystem = TempPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+		subsystem->DecrementHealth();
+		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Can't find the playercontroller"), *GetNameSafe(this));
+	}
 }
 
 void ABrawlCharacter::Fall()
