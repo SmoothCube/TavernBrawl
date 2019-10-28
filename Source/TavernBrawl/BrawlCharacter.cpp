@@ -59,13 +59,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
-	//float Speed = GetMovementComponent()->Velocity.Size();
-	////UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Tick] Speed: %f"), Speed);
-	//if (Speed >= GetMovementComponent()->GetMaxSpeed())
-	//{
-	//	PlayControllerVibration(0.1f);
-	//	Fall();
-	//}
 }
 
 
@@ -133,8 +126,13 @@ void ABrawlCharacter::HandleRotationInput()
 	RotationVector.Normalize(RotationTiltCutoff);
 	if (!RotationVector.IsNearlyZero(RotationTiltCutoff))
 	{
-		SetActorRotation(RotationVector.Rotation());
+		if (!SetActorRotation(RotationVector.Rotation()))
+		{
+
+			UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleRotationInput] SetActorRotation() Failed: %s"), *GetNameSafe(this));
+		}//  ETeleportType::TeleportPhysics
 		PrevRotationVector = RotationVector;
+
 	}
 	else
 	{
@@ -242,10 +240,8 @@ void ABrawlCharacter::GetUp()
 	bHasFallen = false;
 }
 
-FVector ABrawlCharacter::FindLeanVector()
+FRotator ABrawlCharacter::GetPrevRotation()
 {
-	FVector LeanVector = GetActorRotation().RotateVector(InitialRelativeMeshRotation.RotateVector(GetVelocity()));
-	//LeanVector = InitialRelativeMeshRotation.RotateVector(LeanVector);
-	InitialRelativeMeshRotation.RotateVector(GetVelocity());
-	return FVector(0);
+	//UE_LOG(LogTemp, Warning, TEXT("Actor Rotation: %s"), *PrevRotationVector.Rotation().ToString());
+	return PrevRotationVector.Rotation(); //works but will always be delayed by a frame.. ugly
 }
