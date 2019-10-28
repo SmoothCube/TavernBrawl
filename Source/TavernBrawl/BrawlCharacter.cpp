@@ -38,6 +38,11 @@ void ABrawlCharacter::BeginPlay()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	InitialRelativeMeshLocation = GetMesh()->RelativeLocation;
 	InitialRelativeMeshRotation = GetMesh()->RelativeRotation;
+	BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
+	if(!BrawlPlayerController) 
+	{
+		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::BeginPlay] No Player Controller for player %s"), *GetNameSafe(this));
+	}
 }
 
 // Called every frame
@@ -87,17 +92,14 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		}
 		else if (FallVectorSizeSquared >= TimeBeforeFallSquared / 2)
 		{
-			
 			//PlayControllerVibration(FallVectorSizeSquared / TimeBeforeFallSquared);
 			float Strength = FallVectorSizeSquared / TimeBeforeFallSquared;
 			
-			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
-			//c->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
+			BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
 		}
 		else
 		{
-			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
 			//FallVector = FVector(0)
 		}
 	}
@@ -178,8 +180,7 @@ void ABrawlCharacter::Fall()
 		false);
 	bHasFallen = true;
 	GetMesh()->AddForce(Velocity, "head");
-	ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
-	c->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
+	BrawlPlayerController->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
 	GetMovementComponent()->StopActiveMovement();
 }
 

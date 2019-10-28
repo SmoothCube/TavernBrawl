@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "BrawlCharacter.generated.h"
 
+class ABrawlPlayerController;
 UCLASS()
 class TAVERNBRAWL_API ABrawlCharacter : public ACharacter
 {
@@ -77,6 +78,7 @@ private:
 	FTimerHandle TH_FallHandle;
 	FTimerHandle TH_PunchHandle;
 
+	ABrawlPlayerController *BrawlPlayerController = nullptr;
 
 	FVector InitialRelativeMeshLocation;
 	FRotator InitialRelativeMeshRotation;
