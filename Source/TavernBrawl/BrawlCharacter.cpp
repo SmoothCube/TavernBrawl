@@ -94,29 +94,29 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		{
 			FallVector = FVector(0);
 		}
-		FallVector.GetClampedToMaxSize(1);
-		
-		GetMovementComponent()->AddInputVector(FallVector);
-		
-		float TimeBeforeFallSquared = TimeBeforeFall;	//Just so we can compare to SizeSquared, as this is cheaper
-		float FallVectorSizeSquared = FallVector.Size();
-		if (FallVectorSizeSquared >= TimeBeforeFallSquared)
+
+		if (GetVelocity().Size() > GetMovementComponent()->GetMaxSpeed() * 0.9)
 		{
-			//Fall();
-		}
-		else if (FallVectorSizeSquared >= TimeBeforeFallSquared / 2)
-		{
-			//PlayControllerVibration(FallVectorSizeSquared / TimeBeforeFallSquared);
-			float Strength = FallVectorSizeSquared / TimeBeforeFallSquared;
-			
-			if(BrawlPlayerController)
-				BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
-			//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
+			CurrentFallTimer += DeltaTime;
+
+			if (CurrentFallTimer > TimeBeforeFall)
+			{
+				Fall();
+			}
+			else if (CurrentFallTimer > TimeBeforeFall * 0.3)
+			{
+				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner å vibrere med 0.3
+				if (BrawlPlayerController)
+					BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
+			}
 		}
 		else
 		{
-			//FallVector = FVector(0)
+			CurrentFallTimer = 0.f;
 		}
+
+		FallVector.GetClampedToMaxSize(1);
+		GetMovementComponent()->AddInputVector(FallVector);
 	}
 }
 
@@ -214,10 +214,11 @@ void ABrawlCharacter::Fall()
 		false);
 	bHasFallen = true;
 	GetMesh()->AddForce(Velocity, "head");
-	if(BrawlPlayerController)
+	if (BrawlPlayerController)
 		BrawlPlayerController->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
-	GetMovementComponent()->StopActiveMovement();
-	//FallVector = FVector(0);
+	GetMovementComponent()->Velocity = FVector(0);
+	GetMovementComponent()->StopMovementImmediately();
+	FallVector = FVector(0);
 }
 
 void ABrawlCharacter::GetUp()
