@@ -79,11 +79,25 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 {
 	FVector InputVector(GetInputAxisValue(MoveForwardBinding), GetInputAxisValue(MoveRightBinding), 0);
 
-	if (!bHasFallen && !InputVector.IsNearlyZero())
+	if (!bHasFallen)
 	{
-		InputVector.Normalize();
-		GetMovementComponent()->AddInputVector(InputVector);
-		FallVector += InputVector;
+		if (InputVector.SizeSquared() > 1.f)
+		{
+			InputVector.Normalize();
+		}
+
+		if (InputVector.Size() > 0.0001f)
+		{
+			FallVector = InputVector;// +FVector::DotProduct(FallVector.GetSafeNormal(), InputVector.GetSafeNormal()) * BrakeMultiplier;
+		}
+		if (FallVector.Size() < StopSpeed)
+		{
+			FallVector = FVector(0);
+		}
+		FallVector.GetClampedToMaxSize(1);
+		
+		GetMovementComponent()->AddInputVector(FallVector);
+		
 		float TimeBeforeFallSquared = TimeBeforeFall;	//Just so we can compare to SizeSquared, as this is cheaper
 		float FallVectorSizeSquared = FallVector.Size();
 		if (FallVectorSizeSquared >= TimeBeforeFallSquared)
@@ -95,7 +109,8 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			//PlayControllerVibration(FallVectorSizeSquared / TimeBeforeFallSquared);
 			float Strength = FallVectorSizeSquared / TimeBeforeFallSquared;
 			
-			BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
+			if(BrawlPlayerController)
+				BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
 		}
 		else
@@ -180,8 +195,10 @@ void ABrawlCharacter::Fall()
 		false);
 	bHasFallen = true;
 	GetMesh()->AddForce(Velocity, "head");
-	BrawlPlayerController->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
+	if(BrawlPlayerController)
+		BrawlPlayerController->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
 	GetMovementComponent()->StopActiveMovement();
+	//FallVector = FVector(0);
 }
 
 void ABrawlCharacter::GetUp()
