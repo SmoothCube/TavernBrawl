@@ -83,7 +83,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		float FallVectorSizeSquared = FallVector.Size();
 		if (FallVectorSizeSquared >= TimeBeforeFallSquared)
 		{
-			Fall();
+			//Fall();
 		}
 		else if (FallVectorSizeSquared >= TimeBeforeFallSquared / 2)
 		{
@@ -93,12 +93,12 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			
 			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
 			c->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
-			UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
+			//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
 		}
 		else
 		{
 			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
-			FallVector = FVector(0)
+			//FallVector = FVector(0)
 		}
 	}
 }
@@ -158,7 +158,7 @@ void ABrawlCharacter::GetPunched(FVector punchStrength)
 //	GetMovementComponent()->AddInputVector(punchStrength, true);
 
 	Fall();
-	GetMesh()->AddForce(punchStrength, "head");
+	GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
 }
 
 void ABrawlCharacter::Fall()
