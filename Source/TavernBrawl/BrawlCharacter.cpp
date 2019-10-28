@@ -74,7 +74,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 {
 	FVector InputVector(GetInputAxisValue(MoveForwardBinding), GetInputAxisValue(MoveRightBinding), 0);
 
-	if (bIsMovementAllowed && !InputVector.IsNearlyZero())
+	if (!bHasFallen && !InputVector.IsNearlyZero())
 	{
 		InputVector.Normalize();
 		GetMovementComponent()->AddInputVector(InputVector);
@@ -92,7 +92,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			float Strength = FallVectorSizeSquared / TimeBeforeFallSquared;
 			
 			ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
-			c->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
+			//c->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleMovementInput] Playing Force Feedback:! Strength: %f"), Strength);
 		}
 		else
@@ -130,23 +130,24 @@ void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedC
 
 void ABrawlCharacter::Punch()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
+	if (!bHasFallen)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
+		PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		bIsPunching = true;
 
-	PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	bIsPunching = true;
-
-	GetWorld()->GetTimerManager().SetTimer(
-		TH_FallHandle,
-		this,
-		&ABrawlCharacter::PunchEnd,
-		PunchLength,
-		false);
+		GetWorld()->GetTimerManager().SetTimer(
+			TH_PunchHandle,
+			this,
+			&ABrawlCharacter::PunchEnd,
+			PunchLength,
+			false);
+	}
 }
 
 void ABrawlCharacter::PunchEnd()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Player Punch End: %s"), *GetNameSafe(this));
-
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Player Punch End: %s"), *GetNameSafe(this));
 	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	bIsPunching = false;
@@ -154,9 +155,9 @@ void ABrawlCharacter::PunchEnd()
 
 void ABrawlCharacter::GetPunched(FVector punchStrength)
 {
-//	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
 //	GetMovementComponent()->AddInputVector(punchStrength, true);
-
+	PunchEnd();
 	Fall();
 	GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
 }
@@ -175,7 +176,7 @@ void ABrawlCharacter::Fall()
 		&ABrawlCharacter::GetUp,
 		RecoveryTime,
 		false);
-	bIsMovementAllowed = false;
+	bHasFallen = true;
 	GetMesh()->AddForce(Velocity, "head");
 	ABrawlPlayerController* c = Cast<ABrawlPlayerController>(Controller);
 	c->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
@@ -199,7 +200,7 @@ void ABrawlCharacter::GetUp()
 	
 	//GetMesh()->SetRelativeLocation(InitialRelativeMeshLocation);
 	//GetMesh()->SetRelativeRotation(InitialRelativeMeshRotation);
-	bIsMovementAllowed = true;
+	bHasFallen = false;
 }
 
 FVector ABrawlCharacter::FindLeanVector()

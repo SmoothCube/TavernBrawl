@@ -71,8 +71,8 @@ private:
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
 	FVector FallVector{ 0.f,0.f,0.f };
 
-	bool bIsMovementAllowed = true;
 	bool bIsPunching = false;
+	bool bHasFallen = false;
 
 	FTimerHandle TH_FallHandle;
 	FTimerHandle TH_PunchHandle;
