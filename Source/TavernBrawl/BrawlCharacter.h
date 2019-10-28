@@ -22,7 +22,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
-	FVector FindLeanVector();
+	FRotator GetPrevRotation();
 
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
