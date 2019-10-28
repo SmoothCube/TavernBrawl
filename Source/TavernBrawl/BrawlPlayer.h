@@ -29,20 +29,24 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USkeletalMeshComponent* Mesh = nullptr;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UCapsuleComponent* Capsule = nullptr;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UBrawlerMovementComponent* MovementComponent = nullptr;
 
 	UFUNCTION(BlueprintCallable)
 	FVector GetMovemetDirection() { return MovementDirection; }
 
+	UFUNCTION(BlueprintCallable)
+	float GetSpeed();
+
+	void GetUp();
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-private:
 	FVector MovementDirection{ 0,0,0 };
+private:
 };

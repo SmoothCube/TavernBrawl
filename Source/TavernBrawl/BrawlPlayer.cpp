@@ -31,7 +31,6 @@ ABrawlPlayer::ABrawlPlayer()
 void ABrawlPlayer::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -43,10 +42,23 @@ void ABrawlPlayer::Tick(float DeltaTime)
 	// Find movement direction
 	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
+
+	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
+	const float FireRightValue = GetInputAxisValue(FireRightBinding);
+
+	//MovementDirection.X += ForwardValue;
+	//MovementDirection.Y += RightValue;
 	MovementDirection = FVector(ForwardValue, RightValue, 0);
-	MovementDirection.Normalize();
+	if(MovementDirection.SizeSquared() > 1.0f)
+		MovementDirection.Normalize();
+
+	FVector RotationDirection = FVector(FireForwardValue, FireRightValue, 0);
+	RotationDirection.Normalize();
 	if (MovementComponent)
+	{
 		MovementComponent->SetInputVector(MovementDirection);
+		MovementComponent->SetRotationVector(RotationDirection);
+	}
 	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
 	//const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
@@ -85,3 +97,7 @@ void ABrawlPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 }
 
 
+float ABrawlPlayer::GetSpeed()
+{ 
+	return MovementComponent->GetSpeed(); 
+}
