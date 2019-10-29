@@ -6,7 +6,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h"
 #include "BrawlPlayerController.h"
-#include "BrawlPlayer.h"
+#include "BrawlCharacter.h"
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
