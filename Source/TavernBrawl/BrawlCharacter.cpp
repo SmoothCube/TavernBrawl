@@ -229,15 +229,11 @@ void ABrawlCharacter::GetUp()
 	GetMesh()->SetSimulatePhysics(false);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	GetCapsuleComponent()->SetWorldLocation(GetMesh()->GetRelativeTransform().GetLocation());
 	FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget,false);
 	GetMesh()->AttachToComponent(GetRootComponent(), Rule);
-
-
-	//GetMesh()->SetWorldLocationAndRotationNoPhysics(GetActorLocation() + FVector(0, 0, -80), GetActorRotation() + FRotator(0, -90, 0));
 	GetMesh()->SetRelativeLocationAndRotation(InitialRelativeMeshLocation, InitialRelativeMeshRotation);
-	
-	//GetMesh()->SetRelativeLocation(InitialRelativeMeshLocation);
-	//GetMesh()->SetRelativeRotation(InitialRelativeMeshRotation);
+	AddActorWorldOffset(FVector(0, 0,  GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
 	bHasFallen = false;
 }
 
