@@ -10,7 +10,7 @@
 class UCameraComponent;
 class USpringArmComponent;
 class USceneComponent;
-class ABrawlPlayerController;
+class ABrawlCharacter;
 
 UCLASS()
 class TAVERNBRAWL_API ACameraFocusActor : public AActor
@@ -41,7 +41,7 @@ private:
 	virtual void Tick(float DeltaTime) override;
 
 
-	TArray<ABrawlPlayerController*> Players;
+	TArray<ABrawlCharacter*> Players;
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")

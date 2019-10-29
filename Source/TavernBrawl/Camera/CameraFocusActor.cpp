@@ -8,6 +8,7 @@
 #include "BrawlPlayerController.h"
 #include "BrawlCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 ACameraFocusActor::ACameraFocusActor()
@@ -47,12 +48,13 @@ void ACameraFocusActor::Tick(float DeltaTime)
 	FVector sum = FVector::ZeroVector;
 	float distanceToFurthestPlayer = 0.f;
 
-	for (const auto PlayerController : Players)
+	for (const auto Player : Players)
 	{
-		auto Pawn = PlayerController->GetPawn();
-		if (!Pawn) { UE_LOG(LogTemp, Warning, TEXT("Missing Pawn for PlayerController: %s"), *GetNameSafe(this)); continue; }
-		sum += Pawn->GetActorLocation();
-		auto distance = FVector::Dist(Pawn->GetActorLocation(), GetActorLocation());
+		if (!Player) { UE_LOG(LogTemp, Warning, TEXT("Missing Pawn for PlayerController: %s"), *GetNameSafe(this)); continue; }
+
+		FVector PlayerMeshLocation = Player->GetMesh()->GetComponentLocation();
+		sum += PlayerMeshLocation;
+		auto distance = FVector::Dist(PlayerMeshLocation, GetActorLocation());
 		if (distance > distanceToFurthestPlayer)
 			distanceToFurthestPlayer = distance;
 	}
@@ -67,23 +69,24 @@ void ACameraFocusActor::Tick(float DeltaTime)
 	{
 		SpringArm->TargetArmLength = SmallestSpringArmLength*BorderWidth;
 	}
-
+	sum.Z = 0;
 	SetActorLocation(sum);
 }
 
 void ACameraFocusActor::SetupCamera()
 {
 	TArray<AActor*> TempPlayerArray;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABrawlPlayerController::StaticClass(), TempPlayerArray);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABrawlCharacter::StaticClass(), TempPlayerArray);
 	
 	Players.Empty();
 	for (const auto TempPlayer : TempPlayerArray)
 	{
-		Players.Push(Cast<ABrawlPlayerController>(TempPlayer));
+		Players.Push(Cast<ABrawlCharacter>(TempPlayer));
 	}
 
 	for (const auto Player : Players)
 	{
-		Player->SetViewTarget(this);
+		ABrawlPlayerController* PlayerController = Cast<ABrawlPlayerController>(Player->GetController());
+		PlayerController->SetViewTarget(this);
 	}
 }
