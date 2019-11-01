@@ -5,7 +5,6 @@
 
 void UScoreSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-
 }
 
 void UScoreSubsystem::Deinitialize()
@@ -25,5 +24,12 @@ void UScoreSubsystem::SetHealth(int Value)
 void UScoreSubsystem::DecrementHealth()
 {
 	Health -= 1;
+	if (Health <= 0)
+		Health = 0;
+
 	OnHealthTaken.Broadcast(Health);
+	if (Health == 0)
+	{
+		OnZeroHealth.Broadcast();
+	}
 }

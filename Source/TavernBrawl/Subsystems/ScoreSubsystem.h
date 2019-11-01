@@ -9,6 +9,7 @@
 /**
  * 
  */
+
 UCLASS()
 class TAVERNBRAWL_API UScoreSubsystem : public ULocalPlayerSubsystem
 {
@@ -39,6 +40,5 @@ public:
 			FZeroHealth OnZeroHealth;
 	
 private:
-
 	int Health = 5;
 };

@@ -19,6 +19,10 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION()
+	void KillCharacter();
+
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UFUNCTION(BlueprintCallable)
@@ -93,4 +97,8 @@ private:
 
 	FVector InitialRelativeMeshLocation;
 	FRotator InitialRelativeMeshRotation;
+
+	bool bAssignedEvent = false;
+
+	bool bIsDead = false;
 };

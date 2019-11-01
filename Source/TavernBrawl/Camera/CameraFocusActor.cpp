@@ -34,7 +34,6 @@ ACameraFocusActor::ACameraFocusActor()
 void ACameraFocusActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -89,4 +88,9 @@ void ACameraFocusActor::SetupCamera()
 		ABrawlPlayerController* PlayerController = Cast<ABrawlPlayerController>(Player->GetController());
 		PlayerController->SetViewTarget(this);
 	}
+}
+
+void ACameraFocusActor::RemovePlayer(ABrawlCharacter* Player)
+{
+	Players.Remove(Player);
 }

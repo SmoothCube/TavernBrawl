@@ -33,6 +33,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetupCamera();
 	
+	UFUNCTION()
+		void RemovePlayer(ABrawlCharacter* Player);
 
 private:
 	// Called when the game starts or when spawned

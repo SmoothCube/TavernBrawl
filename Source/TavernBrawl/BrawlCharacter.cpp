@@ -14,6 +14,8 @@
 #include "BrawlPlayerController.h"
 #include "Subsystems/ScoreSubsystem.h"
 #include "Engine/LocalPlayer.h"
+#include "Camera/CameraFocusActor.h"
+#include "Kismet/GameplayStatics.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -56,12 +58,26 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	if (!BrawlPlayerController)
 		BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
 
+	if (BrawlPlayerController && !bAssignedEvent)
+	{
+		bAssignedEvent = true;
+		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+		UE_LOG(LogTemp, Warning, TEXT("I'm  here"));
+		subsystem->OnZeroHealth.AddDynamic(this, &ABrawlCharacter::KillCharacter);
+	}
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
 }
 
-
+void ABrawlCharacter::KillCharacter()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[KillCharacter] %s is killed"), *GetNameSafe(this));
+	bIsDead = true;
+	TArray<AActor*> OutActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraFocusActor::StaticClass(), OutActors);
+	Cast<ACameraFocusActor>(OutActors[0])->RemovePlayer(this);
+}
 
 // Called to bind functionality to input
 void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -219,22 +235,26 @@ void ABrawlCharacter::Fall()
 	GetMovementComponent()->Velocity = FVector(0);
 	GetMovementComponent()->StopMovementImmediately();
 	FallVector = FVector(0);
+
 }
 
 void ABrawlCharacter::GetUp()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
+	if (!bIsDead)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
 
-	//Note that if this component is currently attached to something, beginning simulation will detach it.
-	GetMesh()->SetSimulatePhysics(false);
-	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	GetCapsuleComponent()->SetWorldLocation(GetMesh()->GetRelativeTransform().GetLocation());
-	FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget,false);
-	GetMesh()->AttachToComponent(GetRootComponent(), Rule);
-	GetMesh()->SetRelativeLocationAndRotation(InitialRelativeMeshLocation, InitialRelativeMeshRotation);
-	AddActorWorldOffset(FVector(0, 0,  GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
-	bHasFallen = false;
+		//Note that if this component is currently attached to something, beginning simulation will detach it.
+		GetMesh()->SetSimulatePhysics(false);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		GetCapsuleComponent()->SetWorldLocation(GetMesh()->GetRelativeTransform().GetLocation());
+		FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+		GetMesh()->AttachToComponent(GetRootComponent(), Rule);
+		GetMesh()->SetRelativeLocationAndRotation(InitialRelativeMeshLocation, InitialRelativeMeshRotation);
+		AddActorWorldOffset(FVector(0, 0, GetCapsuleComponent()->GetScaledCapsuleHalfHeight()));
+		bHasFallen = false;
+	}
 }
 
 FRotator ABrawlCharacter::GetPrevRotation()
