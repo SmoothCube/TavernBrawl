@@ -86,6 +86,9 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
+
+	UPROPERTY(EditDefaultsOnly, Category = Variables)
+	UCurveFloat* DashLengthCurve;
 	
 	float CurrentFallTimer = 0.f;
 	float NormalMaxWalkSpeed;

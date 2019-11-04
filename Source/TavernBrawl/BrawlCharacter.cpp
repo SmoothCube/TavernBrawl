@@ -175,9 +175,8 @@ void ABrawlCharacter::Punch()
 		float f = FVector::DotProduct(PrevRotationVector/PrevRotationVector.Size(), GetCharacterMovement()->Velocity / GetCharacterMovement()->Velocity.Size());
 		//UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::Punch] dot product: %f"), f);
 
-
 		//clamp f+1.1 so max dodge is closer and min dodge is further
-		GetCharacterMovement()->Velocity = PrevRotationVector * GetCharacterMovement()->Velocity.Size() *(f + 1.1)* DashVelocityMultiplier;
+		GetCharacterMovement()->Velocity = PrevRotationVector * GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
 		
 		//
 
