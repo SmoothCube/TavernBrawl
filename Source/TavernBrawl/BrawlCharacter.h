@@ -65,6 +65,9 @@ private:
 	float RecoveryTime= 0.5;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
+	float DashVelocityMultiplier = 1.5f;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
 	float PunchLength = 0.3;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")

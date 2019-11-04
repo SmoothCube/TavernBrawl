@@ -130,8 +130,6 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		{
 			CurrentFallTimer = 0.f;
 		}
-
-		FallVector.GetClampedToMaxSize(1);
 		GetMovementComponent()->AddInputVector(FallVector);
 	}
 }
@@ -140,15 +138,10 @@ void ABrawlCharacter::HandleRotationInput()
 {
 	FVector RotationVector(GetInputAxisValue(RotateForwardBinding), GetInputAxisValue(RotateRightBinding), 0);
 	RotationVector.Normalize(RotationTiltCutoff);
-	if (!RotationVector.IsNearlyZero(RotationTiltCutoff))
+	if (!bIsPunching && !RotationVector.IsNearlyZero(RotationTiltCutoff))
 	{
-		if (!SetActorRotation(RotationVector.Rotation()))
-		{
-
-			UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleRotationInput] SetActorRotation() Failed: %s"), *GetNameSafe(this));
-		}//  ETeleportType::TeleportPhysics
+		SetActorRotation(RotationVector.Rotation());
 		PrevRotationVector = RotationVector;
-
 	}
 	else
 	{
@@ -173,6 +166,8 @@ void ABrawlCharacter::Punch()
 		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
 		PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		bIsPunching = true;
+		GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed * 100;
+		GetCharacterMovement()->Velocity*= DashVelocityMultiplier;
 
 		GetWorld()->GetTimerManager().SetTimer(
 			TH_PunchHandle,
@@ -180,15 +175,18 @@ void ABrawlCharacter::Punch()
 			&ABrawlCharacter::PunchEnd,
 			PunchLength,
 			false);
+
+
 	}
 }
 
 void ABrawlCharacter::PunchEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Player Punch End: %s"), *GetNameSafe(this));
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
 	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	bIsPunching = false;
+	GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed / 100;
 }
 
 void ABrawlCharacter::GetPunched(FVector punchStrength)
