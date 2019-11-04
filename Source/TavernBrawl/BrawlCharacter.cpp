@@ -30,6 +30,10 @@ ABrawlCharacter::ABrawlCharacter()
 	//SetRootComponent(GetCapsuleComponent());
 	PunchSphere = CreateDefaultSubobject<USphereComponent>("PunchSphere");
 	PunchSphere->SetupAttachment(GetMesh(), "sphereCollisionHere");
+
+	PickupSphere = CreateDefaultSubobject<USphereComponent>("PickupSphere");
+	PickupSphere->SetupAttachment(RootComponent);
+	PickupSphere->SetSphereRadius(144);
 }
 
 // Called when the game starts or when spawned
@@ -37,6 +41,7 @@ void ABrawlCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	PunchSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPunchSphereOverlapBegin);
+	PickupSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPickupSphereOverlapBegin);
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -62,7 +67,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	{
 		bAssignedEvent = true;
 		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		UE_LOG(LogTemp, Warning, TEXT("I'm  here"));
 		subsystem->OnZeroHealth.AddDynamic(this, &ABrawlCharacter::KillCharacter);
 	}
 
@@ -77,6 +81,13 @@ void ABrawlCharacter::KillCharacter()
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraFocusActor::StaticClass(), OutActors);
 	Cast<ACameraFocusActor>(OutActors[0])->RemovePlayer(this);
+}
+
+void ABrawlCharacter::OnPickupSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPickupSphereOverlapBegin] %s is overlapping with %s"), *GetNameSafe(OtherActor), *GetNameSafe(this));
+	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget,EAttachmentRule::SnapToTarget,EAttachmentRule::SnapToTarget,true);
+	OtherActor->AttachToComponent(GetMesh(), rules, "ProtoPlayer_BIND_FingerTop_JNT_right");
 }
 
 // Called to bind functionality to input

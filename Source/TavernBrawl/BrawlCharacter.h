@@ -42,6 +42,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USphereComponent* PunchSphere = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class USphereComponent* PickupSphere = nullptr;
+
 private:
 	
 	// Static names for axis bindings
@@ -57,6 +60,9 @@ private:
 	void GetUp();
 	void Punch();
 	void PunchEnd();
+
+	UFUNCTION()
+	void OnPickupSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
 	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
