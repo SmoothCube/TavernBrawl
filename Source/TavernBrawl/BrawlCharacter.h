@@ -4,8 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Character/PunchComponent.h"
 #include "BrawlCharacter.generated.h"
+
+class USphereComponent;
 class ABrawlPlayerController;
+
 UCLASS()
 class TAVERNBRAWL_API ABrawlCharacter : public ACharacter
 {
@@ -15,13 +19,10 @@ public:
 	// Sets default values for this character's properties
 	ABrawlCharacter();
 
-
-
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	void KillCharacter();
+	USphereComponent* GetPunchSphere();
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
@@ -32,13 +33,6 @@ protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
 
-	UFUNCTION(BlueprintCallable)
-	void GetPunched(FVector punchStrength);
-
-
-	UFUNCTION(BlueprintCallable)
-	bool IsPunching() { return bIsPunching; }
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USphereComponent* PunchSphere = nullptr;
 
@@ -48,7 +42,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class UPickupComponent* PickupComponent = nullptr;
 
-private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UPunchComponent* PunchComponent = nullptr;
 	
 	// Static names for axis bindings
 	static const FName MoveForwardBinding;
@@ -59,24 +54,9 @@ private:
 	//How much you have to tilt the right stick before the character rotates to that direction
 	void HandleMovementInput(float DeltaTime);
 	void HandleRotationInput();
-	void Fall();
-	void GetUp();
-	void Punch();
-	void PunchEnd();
-	void setIsPunchingFalse() { bIsPunching = false; }
-
-
-	UFUNCTION()
-	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float RecoveryTime= 0.5;
-
-	UPROPERTY(EditAnywhere, Category = "Variables")
-	float DashVelocityMultiplier = 1.5f;
-
-	UPROPERTY(EditAnywhere, Category = "Variables")
-	float PunchLength = 0.3;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float MaxLeanValue = 90.f;
@@ -93,30 +73,23 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 
-	UPROPERTY(EditDefaultsOnly, Category = Variables)
-	UCurveFloat* DashLengthCurve;
-	
-	float CurrentFallTimer = 0.f;
-	float NormalMaxWalkSpeed;
+	void GetUp();
+	void Fall();
 
-	FVector PrevRotationVector{ 0.f,0.f,0.f };
 	FVector FallVector{ 0.f,0.f,0.f };
+	FVector PrevRotationVector{ 0.f,0.f,0.f };
+
+	ABrawlPlayerController* BrawlPlayerController = nullptr;
+
+	float CurrentFallTimer = 0.f;
 	
-
-	bool bIsPunching = false;
-	bool bHasFallen = false;
-
-
 	FTimerHandle TH_FallHandle;
-	FTimerHandle TH_PunchHandle;
-	FTimerHandle TH_PunchAgainHandle; // want to wait a sec after punch has ended before u can punch again!!
 
-	ABrawlPlayerController *BrawlPlayerController = nullptr;
+	bool bIsDead = false;
+	bool bHasFallen = false;
 
 	FVector InitialRelativeMeshLocation;
 	FRotator InitialRelativeMeshRotation;
 
-	bool bAssignedEvent = false;
-
-	bool bIsDead = false;
+	friend class UPunchComponent;
 };
