@@ -47,6 +47,7 @@ void ABrawlCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::BeginPlay] No Player Controller for player %s"), *GetNameSafe(this));
 	}
+	NormalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 // Called every frame
@@ -130,6 +131,8 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		{
 			CurrentFallTimer = 0.f;
 		}
+
+		FallVector.GetClampedToMaxSize(1);
 		GetMovementComponent()->AddInputVector(FallVector);
 	}
 }
@@ -156,6 +159,7 @@ void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedC
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
 		OtherPlayer->GetPunched(GetVelocity() * 10000);
+		CurrentFallTimer = 0.f;
 	}
 }
 
@@ -163,11 +167,19 @@ void ABrawlCharacter::Punch()
 {
 	if (!bHasFallen)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
+		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
 		PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		bIsPunching = true;
-		GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed * 100;
-		GetCharacterMovement()->Velocity*= DashVelocityMultiplier;
+
+		//normalizes manually :((( ugly
+		float f = FVector::DotProduct(PrevRotationVector/PrevRotationVector.Size(), GetCharacterMovement()->Velocity / GetCharacterMovement()->Velocity.Size());
+		//UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::Punch] dot product: %f"), f);
+
+
+		//clamp f+1.1 so max dodge is closer and min dodge is further
+		GetCharacterMovement()->Velocity = PrevRotationVector * GetCharacterMovement()->Velocity.Size() *(f + 1.1)* DashVelocityMultiplier;
+		
+		//
 
 		GetWorld()->GetTimerManager().SetTimer(
 			TH_PunchHandle,
@@ -175,29 +187,30 @@ void ABrawlCharacter::Punch()
 			&ABrawlCharacter::PunchEnd,
 			PunchLength,
 			false);
-
-
 	}
 }
 
 void ABrawlCharacter::PunchEnd()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
-	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	bIsPunching = false;
-	GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed / 100;
+	GetCharacterMovement()->MaxWalkSpeed = NormalMaxWalkSpeed;
+
+	GetWorld()->GetTimerManager().SetTimer(
+		TH_PunchAgainHandle,
+		this,
+		&ABrawlCharacter::setIsPunchingFalse,
+		0.1f,
+		false);
 }
 
 void ABrawlCharacter::GetPunched(FVector punchStrength)
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
-//	GetMovementComponent()->AddInputVector(punchStrength, true);
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
 	PunchEnd();
 	Fall();
 	GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
 
-	
 	if (BrawlPlayerController)
 	{
 		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
@@ -214,7 +227,7 @@ void ABrawlCharacter::GetPunched(FVector punchStrength)
 
 void ABrawlCharacter::Fall()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
 	FVector Velocity = GetVelocity();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -233,14 +246,13 @@ void ABrawlCharacter::Fall()
 	GetMovementComponent()->Velocity = FVector(0);
 	GetMovementComponent()->StopMovementImmediately();
 	FallVector = FVector(0);
-
 }
 
 void ABrawlCharacter::GetUp()
 {
 	if (!bIsDead)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
+		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
 
 		//Note that if this component is currently attached to something, beginning simulation will detach it.
 		GetMesh()->SetSimulatePhysics(false);

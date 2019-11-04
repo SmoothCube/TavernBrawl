@@ -57,6 +57,8 @@ private:
 	void GetUp();
 	void Punch();
 	void PunchEnd();
+	void setIsPunchingFalse() { bIsPunching = false; }
+
 
 	UFUNCTION()
 	void OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -86,6 +88,8 @@ private:
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 	
 	float CurrentFallTimer = 0.f;
+	float NormalMaxWalkSpeed;
+
 	FVector PrevRotationVector{ 0.f,0.f,0.f };
 	FVector FallVector{ 0.f,0.f,0.f };
 	
@@ -93,8 +97,10 @@ private:
 	bool bIsPunching = false;
 	bool bHasFallen = false;
 
+
 	FTimerHandle TH_FallHandle;
 	FTimerHandle TH_PunchHandle;
+	FTimerHandle TH_PunchAgainHandle; // want to wait a sec after punch has ended before u can punch again!!
 
 	ABrawlPlayerController *BrawlPlayerController = nullptr;
 
