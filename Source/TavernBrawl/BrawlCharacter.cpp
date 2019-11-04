@@ -16,6 +16,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraFocusActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/PickupComponent.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -30,6 +31,12 @@ ABrawlCharacter::ABrawlCharacter()
 	//SetRootComponent(GetCapsuleComponent());
 	PunchSphere = CreateDefaultSubobject<USphereComponent>("PunchSphere");
 	PunchSphere->SetupAttachment(GetMesh(), "sphereCollisionHere");
+
+	PickupSphere = CreateDefaultSubobject<USphereComponent>("PickupSphere");
+	PickupSphere->SetupAttachment(RootComponent);
+	PickupSphere->SetSphereRadius(144);
+
+	PickupComponent = CreateDefaultSubobject<UPickupComponent>("Pickup Component");
 }
 
 // Called when the game starts or when spawned
@@ -48,6 +55,10 @@ void ABrawlCharacter::BeginPlay()
 		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::BeginPlay] No Player Controller for player %s"), *GetNameSafe(this));
 	}
 	NormalMaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+	//Pickup Events
+	PickupSphere->OnComponentBeginOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapBegin);
+	PickupSphere->OnComponentEndOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapEnd);
 }
 
 // Called every frame
@@ -63,7 +74,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	{
 		bAssignedEvent = true;
 		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		UE_LOG(LogTemp, Warning, TEXT("I'm  here"));
 		subsystem->OnZeroHealth.AddDynamic(this, &ABrawlCharacter::KillCharacter);
 	}
 
@@ -80,6 +90,7 @@ void ABrawlCharacter::KillCharacter()
 	Cast<ACameraFocusActor>(OutActors[0])->RemovePlayer(this);
 }
 
+
 // Called to bind functionality to input
 void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -90,6 +101,9 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
 	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &ABrawlCharacter::Punch);
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickupItem);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseItem);
+
 }
 
 void ABrawlCharacter::HandleMovementInput(float DeltaTime)
@@ -122,7 +136,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			}
 			else if (CurrentFallTimer > TimeBeforeFall * 0.3)
 			{
-				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner å vibrere med 0.3
+				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner ï¿½ vibrere med 0.3
 				if (BrawlPlayerController)
 					BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			}

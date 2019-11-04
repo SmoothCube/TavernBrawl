@@ -42,6 +42,12 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USphereComponent* PunchSphere = nullptr;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class USphereComponent* PickupSphere = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	class UPickupComponent* PickupComponent = nullptr;
+
 private:
 	
 	// Static names for axis bindings
