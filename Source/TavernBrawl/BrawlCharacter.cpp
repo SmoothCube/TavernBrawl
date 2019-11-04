@@ -16,6 +16,7 @@
 #include "Engine/LocalPlayer.h"
 #include "Camera/CameraFocusActor.h"
 #include "Kismet/GameplayStatics.h"
+#include "Character/PickupComponent.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -34,6 +35,8 @@ ABrawlCharacter::ABrawlCharacter()
 	PickupSphere = CreateDefaultSubobject<USphereComponent>("PickupSphere");
 	PickupSphere->SetupAttachment(RootComponent);
 	PickupSphere->SetSphereRadius(144);
+
+	PickupComponent = CreateDefaultSubobject<UPickupComponent>("Pickup Component");
 }
 
 // Called when the game starts or when spawned
@@ -41,7 +44,6 @@ void ABrawlCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	PunchSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPunchSphereOverlapBegin);
-	PickupSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPickupSphereOverlapBegin);
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -52,6 +54,10 @@ void ABrawlCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::BeginPlay] No Player Controller for player %s"), *GetNameSafe(this));
 	}
+
+	//Pickup Events
+	PickupSphere->OnComponentBeginOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapBegin);
+	PickupSphere->OnComponentEndOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapEnd);
 }
 
 // Called every frame
@@ -83,12 +89,6 @@ void ABrawlCharacter::KillCharacter()
 	Cast<ACameraFocusActor>(OutActors[0])->RemovePlayer(this);
 }
 
-void ABrawlCharacter::OnPickupSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPickupSphereOverlapBegin] %s is overlapping with %s"), *GetNameSafe(OtherActor), *GetNameSafe(this));
-	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget,EAttachmentRule::SnapToTarget,EAttachmentRule::SnapToTarget,true);
-	OtherActor->AttachToComponent(GetMesh(), rules, "ProtoPlayer_BIND_FingerTop_JNT_right");
-}
 
 // Called to bind functionality to input
 void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -100,6 +100,9 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
 	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &ABrawlCharacter::Punch);
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickupItem);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseItem);
+
 }
 
 void ABrawlCharacter::HandleMovementInput(float DeltaTime)
