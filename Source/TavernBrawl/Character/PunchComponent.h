@@ -32,6 +32,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Variables")
 		float PunchLength = 0.3;
 
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float PunchWaitingTime = 0.1;
+
 	UFUNCTION(BlueprintCallable)
 		void GetPunched(FVector punchStrength);
 

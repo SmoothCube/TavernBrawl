@@ -45,7 +45,7 @@ void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
 void UPunchComponent::Punch()
 {
-	if (!Player->bHasFallen)
+	if (!Player->bHasFallen && !bIsPunching)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::Punch] Punch Begin: %s"), *GetNameSafe(this));
 		Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -77,7 +77,7 @@ void UPunchComponent::PunchEnd()
 		TH_PunchAgainHandle,
 		this,
 		&UPunchComponent::setIsPunchingFalse,
-		0.1f,
+		PunchWaitingTime,
 		false);
 }
 
