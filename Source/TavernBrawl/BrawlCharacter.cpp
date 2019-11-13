@@ -10,12 +10,9 @@
 #include "Components/SphereComponent.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
-
 #include "BrawlPlayerController.h"
-#include "Subsystems/ScoreSubsystem.h"
-#include "Engine/LocalPlayer.h"
-#include "Camera/CameraFocusActor.h"
-#include "Kismet/GameplayStatics.h"
+#include "Character/PickupComponent.h"
+#include "Character/PunchComponent.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -25,18 +22,24 @@ const FName ABrawlCharacter::RotateRightBinding("FireRight");
 // Sets default values
 ABrawlCharacter::ABrawlCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	//SetRootComponent(GetCapsuleComponent());
+
 	PunchSphere = CreateDefaultSubobject<USphereComponent>("PunchSphere");
 	PunchSphere->SetupAttachment(GetMesh(), "sphereCollisionHere");
+
+	PickupSphere = CreateDefaultSubobject<USphereComponent>("PickupSphere");
+	PickupSphere->SetupAttachment(RootComponent);
+	PickupSphere->SetSphereRadius(144);
+
+	PickupComponent = CreateDefaultSubobject<UPickupComponent>("Pickup Component");
+	PunchComponent = CreateDefaultSubobject<UPunchComponent>("Punch Component");
 }
 
 // Called when the game starts or when spawned
 void ABrawlCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	PunchSphere->OnComponentBeginOverlap.AddDynamic(this, &ABrawlCharacter::OnPunchSphereOverlapBegin);
+	PunchSphere->OnComponentBeginOverlap.AddDynamic(PunchComponent, &UPunchComponent::OnOverlapBegin);
 	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -47,6 +50,10 @@ void ABrawlCharacter::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::BeginPlay] No Player Controller for player %s"), *GetNameSafe(this));
 	}
+
+	//Pickup Events
+	PickupSphere->OnComponentBeginOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapBegin);
+	PickupSphere->OnComponentEndOverlap.AddDynamic(PickupComponent, &UPickupComponent::OnOverlapEnd);
 }
 
 // Called every frame
@@ -58,25 +65,14 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	if (!BrawlPlayerController)
 		BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
 
-	if (BrawlPlayerController && !bAssignedEvent)
-	{
-		bAssignedEvent = true;
-		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		UE_LOG(LogTemp, Warning, TEXT("I'm  here"));
-		subsystem->OnZeroHealth.AddDynamic(this, &ABrawlCharacter::KillCharacter);
-	}
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
 }
 
-void ABrawlCharacter::KillCharacter()
+USphereComponent* ABrawlCharacter::GetPunchSphere()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[KillCharacter] %s is killed"), *GetNameSafe(this));
-	bIsDead = true;
-	TArray<AActor*> OutActors;
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraFocusActor::StaticClass(), OutActors);
-	Cast<ACameraFocusActor>(OutActors[0])->RemovePlayer(this);
+	return PunchSphere;
 }
 
 // Called to bind functionality to input
@@ -88,7 +84,9 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(MoveRightBinding);
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
-	PlayerInputComponent->BindAction("Punch", IE_Pressed, this, &ABrawlCharacter::Punch);
+	PlayerInputComponent->BindAction("Punch", IE_Pressed, PunchComponent, &UPunchComponent::Punch);
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickupItem);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseItem);
 }
 
 void ABrawlCharacter::HandleMovementInput(float DeltaTime)
@@ -121,7 +119,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			}
 			else if (CurrentFallTimer > TimeBeforeFall * 0.3)
 			{
-				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner å vibrere med 0.3
+				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner ï¿½ vibrere med 0.3
 				if (BrawlPlayerController)
 					BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			}
@@ -140,15 +138,10 @@ void ABrawlCharacter::HandleRotationInput()
 {
 	FVector RotationVector(GetInputAxisValue(RotateForwardBinding), GetInputAxisValue(RotateRightBinding), 0);
 	RotationVector.Normalize(RotationTiltCutoff);
-	if (!RotationVector.IsNearlyZero(RotationTiltCutoff))
+	if (!PunchComponent->IsPunching() && !RotationVector.IsNearlyZero(RotationTiltCutoff))
 	{
-		if (!SetActorRotation(RotationVector.Rotation()))
-		{
-
-			UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::HandleRotationInput] SetActorRotation() Failed: %s"), *GetNameSafe(this));
-		}//  ETeleportType::TeleportPhysics
+		SetActorRotation(RotationVector.Rotation());
 		PrevRotationVector = RotationVector;
-
 	}
 	else
 	{
@@ -156,67 +149,9 @@ void ABrawlCharacter::HandleRotationInput()
 	}
 }
 
-void ABrawlCharacter::OnPunchSphereOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
-	if (OtherActor != this && OtherPlayer != nullptr)
-	{
-		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
-		OtherPlayer->GetPunched(GetVelocity() * 10000);
-	}
-}
-
-void ABrawlCharacter::Punch()
-{
-	if (!bHasFallen)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Punch Begin: %s"), *GetNameSafe(this));
-		PunchSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		bIsPunching = true;
-
-		GetWorld()->GetTimerManager().SetTimer(
-			TH_PunchHandle,
-			this,
-			&ABrawlCharacter::PunchEnd,
-			PunchLength,
-			false);
-	}
-}
-
-void ABrawlCharacter::PunchEnd()
-{
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Punch] Player Punch End: %s"), *GetNameSafe(this));
-	//	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	PunchSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	bIsPunching = false;
-}
-
-void ABrawlCharacter::GetPunched(FVector punchStrength)
-{
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Got Punched "), *GetNameSafe(this));
-//	GetMovementComponent()->AddInputVector(punchStrength, true);
-	PunchEnd();
-	Fall();
-	GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
-
-	
-	if (BrawlPlayerController)
-	{
-		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		subsystem->DecrementHealth();
-	}
-	else
-	{
-		ABrawlPlayerController* TempPlayerController = Cast<ABrawlPlayerController>(GetController());
-		UScoreSubsystem* subsystem = TempPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		subsystem->DecrementHealth();
-		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetPunched] %s Can't find the playercontroller"), *GetNameSafe(this));
-	}
-}
-
 void ABrawlCharacter::Fall()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
+	//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::Fall] Player Fell: %s"), *GetNameSafe(this));
 	FVector Velocity = GetVelocity();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
@@ -235,14 +170,13 @@ void ABrawlCharacter::Fall()
 	GetMovementComponent()->Velocity = FVector(0);
 	GetMovementComponent()->StopMovementImmediately();
 	FallVector = FVector(0);
-
 }
 
 void ABrawlCharacter::GetUp()
 {
 	if (!bIsDead)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
+		//UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::GetUp] Player Getting up: %s"), *GetNameSafe(this));
 
 		//Note that if this component is currently attached to something, beginning simulation will detach it.
 		GetMesh()->SetSimulatePhysics(false);
