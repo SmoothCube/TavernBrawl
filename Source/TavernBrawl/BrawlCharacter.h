@@ -77,7 +77,7 @@ protected:
 	void Fall();
 
 	FVector FallVector{ 0.f,0.f,0.f };
-	FVector PrevRotationVector{ 0.f,0.f,0.f };
+	FVector PrevRotationVector{ 1.f,0.f,0.f };
 
 	ABrawlPlayerController* BrawlPlayerController = nullptr;
 
