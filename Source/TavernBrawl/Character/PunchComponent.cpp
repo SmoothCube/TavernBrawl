@@ -38,7 +38,7 @@ void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	if (OtherActor != GetOwner() && OtherPlayer != nullptr)
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
-		OtherPlayer->PunchComponent->GetPunched(Player->GetVelocity() * 10000);
+		OtherPlayer->PunchComponent->GetPunched(Player->GetVelocity() * PunchStrength);
 		Player->CurrentFallTimer = 0.f;
 	}
 }
@@ -81,12 +81,12 @@ void UPunchComponent::PunchEnd()
 		false);
 }
 
-void UPunchComponent::GetPunched(FVector punchStrength)
+void UPunchComponent::GetPunched(FVector InPunchStrength)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Got Punched "), *GetNameSafe(this));
 	PunchEnd();
 	Player->Fall();
-	Player->GetMesh()->AddForce(punchStrength, "ProtoPlayer_BIND_Head_JNT_center");
+	Player->GetMesh()->AddForce(InPunchStrength, "ProtoPlayer_BIND_Head_JNT_center");
 
 	if (Player->BrawlPlayerController)
 	{

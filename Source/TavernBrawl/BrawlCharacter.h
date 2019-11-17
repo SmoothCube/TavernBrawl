@@ -29,6 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	FRotator GetPrevRotation();
 
+	virtual void FellOutOfWorld(const class UDamageType& DmgType) override;
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);

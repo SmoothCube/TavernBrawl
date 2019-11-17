@@ -38,8 +38,11 @@ protected:
 	UFUNCTION(BlueprintCallable)
 		void GetPunched(FVector punchStrength);
 
-	UPROPERTY(EditDefaultsOnly, Category = Variables)
+	UPROPERTY(EditDefaultsOnly, Category = "Variables")
 		UCurveFloat* DashLengthCurve;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float PunchStrength = 5000.f;
 
 	UFUNCTION()
 	void KillCharacter();

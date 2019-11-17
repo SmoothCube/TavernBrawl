@@ -10,6 +10,9 @@
 #include "Components/SphereComponent.h"
 #include "TimerManager.h"
 #include "Engine/World.h"
+#include "Kismet/GameplayStatics.h"
+#include "GameFramework/PlayerStart.h"
+
 #include "BrawlPlayerController.h"
 #include "Character/PickupComponent.h"
 #include "Character/PunchComponent.h"
@@ -195,4 +198,18 @@ FRotator ABrawlCharacter::GetPrevRotation()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Actor Rotation: %s"), *PrevRotationVector.Rotation().ToString());
 	return PrevRotationVector.Rotation(); //works but will always be delayed by a frame.. ugly
+}
+
+void ABrawlCharacter::FellOutOfWorld(const UDamageType& DmgType)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::FellOutOFWorld]: %s Fell Out Of World!"), *GetNameSafe(this));
+	GetMovementComponent()->Velocity = FVector(0, 0, GetMovementComponent()->Velocity.Z);
+	FHitResult hit;
+	TArray<AActor*> Starts;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
+	int r = FMath::RandRange(0, Starts.Num()-1);
+
+	FVector RespawnLoc = Starts[r]->GetActorLocation() + FVector(0.f,0.f,2500.f);
+	SetActorLocation(RespawnLoc,false, &hit, ETeleportType::TeleportPhysics);
+
 }
