@@ -113,7 +113,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 		{
 			CurrentFallTimer += DeltaTime;
 
-			if (CurrentFallTimer > TimeBeforeFall)
+			if (CurrentFallTimer > TimeBeforeFall && !GetMovementComponent()->IsFalling())
 			{
 				Fall();
 			}
