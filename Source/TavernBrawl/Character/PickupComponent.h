@@ -24,10 +24,10 @@ public:
 	void SetHoldingItem(AThrowableItem* Item);
 
 	UFUNCTION()
-	void PickupItem();
+	void PickUpNearestItem();
 
 	UFUNCTION()
-	void ReleaseItem();
+	void ReleaseHoldingItem();
 
 	UFUNCTION(BlueprintPure)
 	bool IsHoldingItem();
