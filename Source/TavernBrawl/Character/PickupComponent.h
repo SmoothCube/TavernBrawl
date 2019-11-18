@@ -18,13 +18,22 @@ public:
 	UPickupComponent();
 
 	UFUNCTION()
-	void PickUpNearestItem();
+	void OnPickupOrThrowTrigger();
+
+	void PickupHoldingItem();
+	void StartThrowingItem();
 
 	UFUNCTION()
 	void ReleaseHoldingItem();
 
+	UFUNCTION(BlueprintCallable)
+	void ThrowHoldingItem();
+
 	UFUNCTION(BlueprintPure)
 	bool IsHoldingItem();
+
+	UFUNCTION(BlueprintPure)
+	bool IsAiming();
 
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -35,8 +44,9 @@ public:
 private:
 	
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	TArray<AThrowableItem*> ItemsInRange;
 	AThrowableItem* HoldingItem = nullptr;
 	ABrawlCharacter* Player = nullptr;
+
+	bool bIsAiming = false;
 };
