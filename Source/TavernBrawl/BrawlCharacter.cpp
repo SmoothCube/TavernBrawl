@@ -87,7 +87,7 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(MoveRightBinding);
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
-	PlayerInputComponent->BindAction("Punch", IE_Pressed, PunchComponent, &UPunchComponent::Punch);
+	PlayerInputComponent->BindAction("Punch", IE_Pressed, PunchComponent, &UPunchComponent::PunchButtonPressed);
 	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickupItem);
 	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseItem);
 }
@@ -167,7 +167,7 @@ void ABrawlCharacter::Fall()
 		RecoveryTime,
 		false);
 	bHasFallen = true;
-	GetMesh()->AddForce(Velocity, "head");
+	GetMesh()->AddForce(Velocity, "ProtoPlayer_BIND_Head_JNT_center");
 	if (BrawlPlayerController)
 		BrawlPlayerController->PlayDynamicForceFeedback(1, 0.5, true, true, true, true);
 	GetMovementComponent()->Velocity = FVector(0);

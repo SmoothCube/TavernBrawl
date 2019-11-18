@@ -35,28 +35,21 @@ void UPunchComponent::BeginPlay()
 void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
-	if (OtherActor != GetOwner() && OtherPlayer != nullptr)
+	if (!bHasHit && OtherActor != GetOwner() && OtherPlayer != nullptr)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
-		OtherPlayer->PunchComponent->GetPunched(Player->GetVelocity() * PunchStrength);
-		Player->CurrentFallTimer = 0.f;
+		PunchHit(OtherPlayer);
 	}
 }
 
-void UPunchComponent::Punch()
+void UPunchComponent::PunchButtonPressed()
 {
 	if (!Player->bHasFallen && !bIsPunching)
 	{
-		//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::Punch] Punch Begin: %s"), *GetNameSafe(this));
-		Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 		bIsPunching = true;
-
-		//normalizes manually :((( ugly
-		float f = FVector::DotProduct(Player->PrevRotationVector / Player->PrevRotationVector.Size(), Player->GetCharacterMovement()->Velocity / Player->GetCharacterMovement()->Velocity.Size());
-		//UE_LOG(LogTemp, Error, TEXT("[UPunchComponent::Punch] dot product: %f"), f);
-
-		//clamp f+1.1 so max dodge is closer and min dodge is further
+		float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
 		Player->GetCharacterMovement()->Velocity = Player->PrevRotationVector * Player->GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
+
+		Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 		GetWorld()->GetTimerManager().SetTimer(
 			TH_PunchHandle,
@@ -65,6 +58,15 @@ void UPunchComponent::Punch()
 			PunchLength,
 			false);
 	}
+}
+
+void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
+{
+	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
+	OtherPlayer->PunchComponent->GetPunched(Player->GetVelocity());
+	Player->CurrentFallTimer = 0.f;
+	Player->GetMovementComponent()->Velocity *= PunchHitVelocityDamper;
+	bHasHit = true;
 }
 
 void UPunchComponent::PunchEnd()
@@ -84,10 +86,21 @@ void UPunchComponent::PunchEnd()
 void UPunchComponent::GetPunched(FVector InPunchStrength)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Got Punched "), *GetNameSafe(this));
-	PunchEnd();
-	Player->Fall();
-	Player->GetMesh()->AddForce(InPunchStrength, "ProtoPlayer_BIND_Head_JNT_center");
+	float strength = InPunchStrength.Size();
+	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched]: punch strength: %f"), strength)
 
+	if (strength > MinPunchStrengthToFall)
+	{
+		PunchEnd();
+		Player->Fall();
+		Player->GetMesh()->AddForce(InPunchStrength* PunchStrength, "ProtoPlayer_BIND_Head_JNT_center");
+	}
+	else
+	{
+
+		Player->GetMovementComponent()->Velocity = InPunchStrength;
+		//Player->FallVector = InPunchStrength;
+	}
 	if (Player->BrawlPlayerController)
 	{
 		UScoreSubsystem* subsystem = Player->BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();

@@ -19,8 +19,10 @@ public:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	void PunchHit(ABrawlCharacter* OtherPlayer);
+
 	UFUNCTION()
-	void Punch();
+	void PunchButtonPressed();
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPunching() { return bIsPunching; }
@@ -42,17 +44,24 @@ protected:
 		UCurveFloat* DashLengthCurve;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
-	float PunchStrength = 5000.f;
+	float PunchStrength = 2500.f;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float MinPunchStrengthToFall = 1000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float PunchHitVelocityDamper = 0.3f;
 
 	UFUNCTION()
 	void KillCharacter();
 	
 	virtual void BeginPlay() override;
 
-	void setIsPunchingFalse() { bIsPunching = false; }
+	void setIsPunchingFalse() { bIsPunching = false; bHasHit = false; }
 
 	ABrawlCharacter* Player = nullptr;
 	bool bIsPunching = false;
+	bool bHasHit= false;
 	bool bAssignedEvent = false;
 
 	float NormalMaxWalkSpeed = 0.f;
