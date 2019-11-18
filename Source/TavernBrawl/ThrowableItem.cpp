@@ -11,10 +11,8 @@ AThrowableItem::AThrowableItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	Capsule = CreateDefaultSubobject<UCapsuleComponent>("Capsule");
-	RootComponent = Capsule;
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
-	Mesh->SetupAttachment(Capsule);
+	RootComponent = Mesh;
 }
 
 // Called when the game starts or when spawned

@@ -19,8 +19,6 @@ public:
 	AThrowableItem();
 
 	UPROPERTY(VisibleAnywhere)
-	UCapsuleComponent* Capsule = nullptr;
-	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Mesh = nullptr;
 
 

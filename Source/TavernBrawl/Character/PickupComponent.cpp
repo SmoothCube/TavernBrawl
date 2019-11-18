@@ -63,12 +63,9 @@ void UPickupComponent::PickupItem()
 
 	UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::OnPickupSphereOverlapBegin] %s is overlapping with %s"), *GetNameSafe(HoldingItem), *GetNameSafe(this));
 	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
-	HoldingItem->Capsule->SetSimulatePhysics(false);
-	HoldingItem->Capsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HoldingItem->Mesh->SetSimulatePhysics(false);
-	bool sucess = HoldingItem->Mesh->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ProtoPlayer_BIND_FingerMid_JNT_right"));
-	UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::OnPickupSphereOverlapBegin] %i "), sucess);
+	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ProtoPlayer_BIND_FingerMid_JNT_right"));
 }
 
 void UPickupComponent::ReleaseItem()
@@ -76,9 +73,8 @@ void UPickupComponent::ReleaseItem()
 	if (!HoldingItem) return;
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
-	HoldingItem->Capsule->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	HoldingItem->Capsule->SetSimulatePhysics(true);
+	HoldingItem->Mesh->SetSimulatePhysics(true);
 	HoldingItem = nullptr;
 }
 
