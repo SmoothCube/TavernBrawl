@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "RockPathManager.generated.h"
 class ARockPath;
-class FTimerHandle;
+//class FTimerHandle;
 UCLASS()
 class TAVERNBRAWL_API ARockPathManager : public AActor
 {
@@ -25,6 +25,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	TArray<ARockPath*> Paths;
-	FTimerHandle TH_RockTimer;
+	//FTimerHandle TH_RockTimer;
 
 };
