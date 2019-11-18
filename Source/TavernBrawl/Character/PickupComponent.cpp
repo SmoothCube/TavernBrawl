@@ -45,7 +45,7 @@ void UPickupComponent::SetHoldingItem(AThrowableItem* Item)
 	HoldingItem = Item;
 }
 
-void UPickupComponent::PickupItem()
+void UPickupComponent::PickUpNearestItem()
 {
 	if (HoldingItem) return;
 	if (ItemsInRange.Num() == 0) return;
@@ -68,7 +68,7 @@ void UPickupComponent::PickupItem()
 	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ProtoPlayer_BIND_FingerMid_JNT_right"));
 }
 
-void UPickupComponent::ReleaseItem()
+void UPickupComponent::ReleaseHoldingItem()
 {
 	if (!HoldingItem) return;
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);

@@ -87,9 +87,10 @@ void ABrawlCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	PlayerInputComponent->BindAxis(MoveRightBinding);
 	PlayerInputComponent->BindAxis(RotateForwardBinding);
 	PlayerInputComponent->BindAxis(RotateRightBinding);
+
 	PlayerInputComponent->BindAction("Punch", IE_Pressed, PunchComponent, &UPunchComponent::PunchButtonPressed);
-	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickupItem);
-	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseItem);
+	PlayerInputComponent->BindAction("Pickup", IE_Pressed, PickupComponent, &UPickupComponent::PickUpNearestItem);
+	PlayerInputComponent->BindAction("Drop", IE_Pressed, PickupComponent, &UPickupComponent::ReleaseHoldingItem);
 }
 
 void ABrawlCharacter::HandleMovementInput(float DeltaTime)
