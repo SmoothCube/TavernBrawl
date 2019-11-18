@@ -26,26 +26,29 @@ void UPickupComponent::BeginPlay()
 	Player = Cast<ABrawlCharacter>(GetOwner());
 }
 
-
-// Called every frame
-void UPickupComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UPickupComponent::OnPickupOrThrowTrigger()
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// ...
+	if (HoldingItem)
+	{
+		StartThrowingItem();
+	}
+	else
+	{
+		PickupHoldingItem();
+	}
 }
 
-AThrowableItem* UPickupComponent::GetHoldingItem() const
+void UPickupComponent::ReleaseHoldingItem()
 {
-	return HoldingItem;
+	if (!HoldingItem) return;
+	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
+	HoldingItem->DetachFromActor(rules);
+	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HoldingItem->Mesh->SetSimulatePhysics(true);
+	HoldingItem = nullptr;
 }
 
-void UPickupComponent::SetHoldingItem(AThrowableItem* Item)
-{
-	HoldingItem = Item;
-}
-
-void UPickupComponent::PickUpNearestItem()
+void UPickupComponent::PickupHoldingItem()
 {
 	if (HoldingItem) return;
 	if (ItemsInRange.Num() == 0) return;
@@ -68,14 +71,23 @@ void UPickupComponent::PickUpNearestItem()
 	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ProtoPlayer_BIND_FingerMid_JNT_right"));
 }
 
-void UPickupComponent::ReleaseHoldingItem()
+void UPickupComponent::StartThrowingItem()
+{
+	bIsAiming = true;
+}
+
+void UPickupComponent::ThrowHoldingItem()
 {
 	if (!HoldingItem) return;
+
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HoldingItem->Mesh->SetSimulatePhysics(true);
+	HoldingItem->Mesh->AddImpulse(Player->GetActorForwardVector() * 50000);
 	HoldingItem = nullptr;
+	bIsAiming = false;
+
 }
 
 bool UPickupComponent::IsHoldingItem()
@@ -85,14 +97,18 @@ bool UPickupComponent::IsHoldingItem()
 	return false;
 }
 
+bool UPickupComponent::IsAiming()
+{
+	return bIsAiming;
+}
+
 void UPickupComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	if (HoldingItem) return;
 	AThrowableItem* Item = Cast<AThrowableItem>(OtherActor);
 	if (!Item) return;
 	ItemsInRange.Add(Item);
-	
-	
+
 }
 void UPickupComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
