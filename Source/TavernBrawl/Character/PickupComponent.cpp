@@ -35,16 +35,6 @@ void UPickupComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActo
 	// ...
 }
 
-AThrowableItem* UPickupComponent::GetHoldingItem() const
-{
-	return HoldingItem;
-}
-
-void UPickupComponent::SetHoldingItem(AThrowableItem* Item)
-{
-	HoldingItem = Item;
-}
-
 void UPickupComponent::PickUpNearestItem()
 {
 	if (HoldingItem) return;
