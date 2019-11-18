@@ -30,6 +30,7 @@ public:
 	FRotator GetPrevRotation();
 
 	virtual void FellOutOfWorld(const class UDamageType& DmgType) override;
+	void Fall();
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
@@ -75,7 +76,6 @@ protected:
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 
 	void GetUp();
-	void Fall();
 
 	FVector FallVector{ 0.f,0.f,0.f };
 	FVector PrevRotationVector{ 1.f,0.f,0.f };

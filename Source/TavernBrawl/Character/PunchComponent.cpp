@@ -43,7 +43,7 @@ void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
 void UPunchComponent::PunchButtonPressed()
 {
-	if (!Player->bHasFallen && !bIsPunching)
+	if (!Player->bHasFallen && !bIsPunching && !Player->GetMovementComponent()->IsFalling())
 	{
 		bIsPunching = true;
 		float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
@@ -74,6 +74,7 @@ void UPunchComponent::PunchEnd()
 	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
 	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Player->GetCharacterMovement()->MaxWalkSpeed = NormalMaxWalkSpeed;
+	Player->GetCharacterMovement()->Velocity = Player->GetCharacterMovement()->Velocity.GetClampedToMaxSize(NormalMaxWalkSpeed);
 
 	GetWorld()->GetTimerManager().SetTimer(
 		TH_PunchAgainHandle,
