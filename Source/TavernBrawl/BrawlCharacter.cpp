@@ -123,7 +123,7 @@ void ABrawlCharacter::HandleMovementInput(float DeltaTime)
 			}
 			else if (CurrentFallTimer > TimeBeforeFall * 0.3)
 			{
-				float Strength = CurrentFallTimer / TimeBeforeFall; // begynner � vibrere med 0.3
+				float Strength = CurrentFallTimer / TimeBeforeFall;
 				if (BrawlPlayerController)
 					BrawlPlayerController->PlayDynamicForceFeedback(Strength, 0.1f, true, true, true, true);
 			}

@@ -2,17 +2,19 @@
 
 
 #include "PunchComponent.h"
-#include "BrawlCharacter.h"
 #include "Engine/World.h"
 #include "Components/SphereComponent.h"
-#include "GameFramework/CharacterMovementComponent.h"
-#include "TimerManager.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Subsystems/ScoreSubsystem.h"
 #include "Engine/LocalPlayer.h"
+#include "TimerManager.h"
+#include "Components/CapsuleComponent.h"
+
+#include "BrawlCharacter.h"
 #include "BrawlPlayerController.h"
 #include "Camera/CameraFocusActor.h"
-#include "Kismet/GameplayStatics.h"
 
 UPunchComponent::UPunchComponent()
 {
@@ -35,7 +37,10 @@ void UPunchComponent::BeginPlay()
 void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
-	if (!bHasHit && OtherActor != GetOwner() && OtherPlayer != nullptr)
+	UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(OtherComp);
+	
+	
+	if (!bHasHit && OtherActor != GetOwner() && OtherPlayer != nullptr && Capsule != nullptr)
 	{
 		PunchHit(OtherPlayer);
 	}
@@ -46,18 +51,19 @@ void UPunchComponent::PunchButtonPressed()
 	if (!Player->bHasFallen && !bIsPunching && !Player->GetMovementComponent()->IsFalling())
 	{
 		bIsPunching = true;
-		float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
-		Player->GetCharacterMovement()->Velocity = Player->PrevRotationVector * Player->GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
-
-		Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-
-		GetWorld()->GetTimerManager().SetTimer(
-			TH_PunchHandle,
-			this,
-			&UPunchComponent::PunchEnd,
-			PunchLength,
-			false);
 	}
+}
+
+void UPunchComponent::Punch()
+{
+	float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
+	Player->GetCharacterMovement()->Velocity = Player->PrevRotationVector * Player->GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
+	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void UPunchComponent::PunchWithItem()
+{
+	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItem]: %s punching!"), *GetNameSafe(this));
 }
 
 void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
@@ -67,11 +73,14 @@ void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
 	Player->CurrentFallTimer = 0.f;
 	Player->GetMovementComponent()->Velocity *= PunchHitVelocityDamper;
 	bHasHit = true;
+
+	if (Player->BrawlPlayerController)
+		Player->BrawlPlayerController->PlayDynamicForceFeedback(0.7f, 0.1f, true, true, true, true);
 }
 
 void UPunchComponent::PunchEnd()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
+	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
 	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Player->GetCharacterMovement()->MaxWalkSpeed = NormalMaxWalkSpeed;
 	Player->GetCharacterMovement()->Velocity = Player->GetCharacterMovement()->Velocity.GetClampedToMaxSize(NormalMaxWalkSpeed);

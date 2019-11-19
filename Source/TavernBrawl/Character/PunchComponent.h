@@ -25,11 +25,18 @@ public:
 	void PunchButtonPressed();
 
 	UFUNCTION(BlueprintCallable)
-	bool IsPunching() { return bIsPunching; }
+	void Punch();
 
+	UFUNCTION(BlueprintCallable)
+	void PunchWithItem();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPunching() { return bIsPunching; }
+	
+	UFUNCTION(BlueprintCallable)
+	void PunchEnd();
 protected:	
 
-	void PunchEnd();
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
 		float PunchLength = 0.3;
@@ -38,10 +45,10 @@ protected:
 	float PunchWaitingTime = 0.1;
 
 	UFUNCTION(BlueprintCallable)
-		void GetPunched(FVector punchStrength);
+	void GetPunched(FVector punchStrength);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Variables")
-		UCurveFloat* DashLengthCurve;
+	UCurveFloat* DashLengthCurve;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float PunchStrength = 2500.f;
