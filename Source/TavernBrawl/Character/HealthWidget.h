@@ -6,7 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "HealthWidget.generated.h"
 
-class UProgressBar;
+class UImage;
+class UScoreSubsystem;
+class UMaterialInstanceDynamic;
 class ABrawlPlayerController;
 
 UCLASS()
@@ -23,14 +25,18 @@ public:
 	UFUNCTION()
 	void UpdateHealth(int Amount);
 
-private:
+protected:
 
 	UPROPERTY(meta = (BindWidget))
-	UProgressBar* HealthBar;
+	UImage* HealthImage;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	UObject* Image;
+
+private:
+
+	UMaterialInstanceDynamic* Material = nullptr;
 	ABrawlPlayerController* Owner = nullptr;
-
-	int32 MaxHealth;
-	float Step = 0.2f;
+	UScoreSubsystem* scoreSystem = nullptr;
 	
 };	

@@ -6,6 +6,8 @@
 
 void UScoreSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	GConfig->LoadFile(GGameIni);
+
 	FString test = "GameMode";
 	GConfig->GetInt(
 		*test,

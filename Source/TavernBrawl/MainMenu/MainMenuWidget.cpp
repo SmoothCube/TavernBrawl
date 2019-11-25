@@ -19,4 +19,6 @@ void UMainMenuWidget::UpdateConfig()
 		Health,
 		GGameIni
 	);
+
+	GConfig->Flush(false, GGameIni);
 }
