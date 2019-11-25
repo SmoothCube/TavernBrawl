@@ -5,6 +5,21 @@
 #include "UMG/Public/Components/ProgressBar.h"
 #include "BrawlPlayerController.h"
 #include "Subsystems/ScoreSubsystem.h"
+#include "ConfigCacheIni.h"
+
+bool UHealthWidget::Initialize()
+{
+	bool s = Super::Initialize();
+	FString test = "GameMode";
+	GConfig->GetInt(
+		*test,
+		TEXT("Health"),
+		MaxHealth,
+		GGameIni
+	);
+
+	return s;
+}
 
 void UHealthWidget::SetupOwnerAndBindEvents(ABrawlPlayerController* inOwner)
 {
@@ -19,5 +34,5 @@ void UHealthWidget::SetupOwnerAndBindEvents(ABrawlPlayerController* inOwner)
 void UHealthWidget::UpdateHealth(int Amount)
 {
 	UE_LOG(LogTemp, Warning, TEXT("New health %i"), Amount);
-	HealthBar->SetPercent(Step * Amount);
+	HealthBar->SetPercent(StaticCast<float>(Amount)/StaticCast<float>(MaxHealth));
 }

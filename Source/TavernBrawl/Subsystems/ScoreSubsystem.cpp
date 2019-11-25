@@ -2,9 +2,17 @@
 
 
 #include "ScoreSubsystem.h"
+#include "ConfigCacheIni.h"
 
 void UScoreSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
+	FString test = "GameMode";
+	GConfig->GetInt(
+		*test,
+		TEXT("Health"),
+		Health,
+		GGameIni
+	);
 }
 
 void UScoreSubsystem::Deinitialize()
@@ -26,7 +34,7 @@ void UScoreSubsystem::DecrementHealth()
 	Health -= 1;
 	if (Health <= 0)
 		Health = 0;
-	UE_LOG(LogTemp, Warning, TEXT("HEI %i"), Health);
+	UE_LOG(LogTemp, Warning, TEXT("Took one damage %i"), Health);
 	OnHealthTaken.Broadcast(Health);
 	if (Health == 0)
 	{

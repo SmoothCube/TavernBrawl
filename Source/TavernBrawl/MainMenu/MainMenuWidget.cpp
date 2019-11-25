@@ -1,23 +1,22 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "BrawlGameMode.h"
+#include "MainMenuWidget.h"
 #include "ConfigCacheIni.h"
 
-void ABrawlGameMode::BeginPlay()
+void UMainMenuWidget::UpdateConfig()
 {
-
-	UE_LOG(LogTemp, Warning, TEXT("Starting"));
-
-
 	FString test = "GameMode";
-	GConfig->GetInt(
+	GConfig->SetInt(
 		*test,
 		TEXT("NumberOfPlayers"),
 		NumberOfPlayers,
 		GGameIni
 	);
 
-	UE_LOG(LogTemp, Warning, TEXT("%i"), NumberOfPlayers);
-	Super::BeginPlay();
+	GConfig->SetInt(
+		*test,
+		TEXT("Health"),
+		Health,
+		GGameIni
+	);
 }

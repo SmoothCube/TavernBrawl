@@ -13,5 +13,13 @@ UCLASS()
 class TAVERNBRAWL_API ABrawlGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+		virtual void BeginPlay() override;
+
+protected:
+
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
+	int32 NumberOfPlayers = 1;
+
 };
