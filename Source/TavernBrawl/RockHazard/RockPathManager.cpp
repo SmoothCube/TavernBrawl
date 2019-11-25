@@ -2,12 +2,14 @@
 
 
 #include "RockPathManager.h"
-
+#include "Engine/World.h"
+#include "TimerManager.h"
+#include "RockPath.h"
 // Sets default values
 ARockPathManager::ARockPathManager()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -15,13 +17,18 @@ ARockPathManager::ARockPathManager()
 void ARockPathManager::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	GetWorld()->GetTimerManager().SetTimer(
+		TH_RockTimer,
+		this,
+		&ARockPathManager::SpawnRock,
+		RockDelay,
+		true);
 }
 
-// Called every frame
-void ARockPathManager::Tick(float DeltaTime)
+void ARockPathManager::SpawnRock()
 {
-	Super::Tick(DeltaTime);
+	int index =  FMath::RandRange(0, Paths.Num() - 1);
+	Paths[index]->SpawnRock();
 
 }
 

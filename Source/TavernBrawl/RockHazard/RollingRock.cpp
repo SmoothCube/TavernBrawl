@@ -35,9 +35,16 @@ void ARollingRock::Tick(float DeltaTime)
 void ARollingRock::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	ABrawlCharacter* Player = nullptr;
-	Player= Cast<ABrawlCharacter>(Player);
+	Player= Cast<ABrawlCharacter>(OtherActor);
 	if (Player)
 	{
+		UE_LOG(LogTemp, Warning, TEXT("[ARollingRock::OnOverlapBegin]: %s overlapped!"), *GetNameSafe(this));
 		Player->Fall();
 	}
+}
+
+void ARollingRock::Fall()
+{
+	Sphere->SetSimulatePhysics(true);
+	Sphere->SetEnableGravity(true);
 }

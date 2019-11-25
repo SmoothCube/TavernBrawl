@@ -3,8 +3,10 @@
 
 #include "RockPath.h"
 #include "Components/SplineComponent.h"
+#include "Math/UnrealMathUtility.h"
 
 #include "RollingRock.h"
+#include "Components/SphereComponent.h"
 
 ARockPath::ARockPath()
 {
@@ -15,18 +17,35 @@ ARockPath::ARockPath()
 void ARockPath::BeginPlay()
 {
 	Super::BeginPlay();
-	SpawnRock();
 }
 
 // Called every frame
 void ARockPath::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	TArray<ARollingRock*> RocksToDelete;
 	for (auto& r : ActiveRocks)
 	{
 		r->t+= r->speed*DeltaTime;
-		r->SetActorTransform(Path->GetTransformAtTime(r->t,ESplineCoordinateSpace::World));
+		r->SetActorTransform(Path->GetTransformAtTime(r->t, ESplineCoordinateSpace::World));
+
+		//Rolling code
+		FVector nextPos = Path->GetLocationAtTime(r->t+ r->speed*DeltaTime, ESplineCoordinateSpace::World);
+		nextPos = nextPos - r->GetActorLocation();
+		float d = nextPos.Size() / r->Sphere->GetScaledSphereRadius();
+		d = d / (2.f* PI )* 360;
+		r->degrees-=d;
+		r->SetActorRotation(FRotator(r->degrees, r->GetActorRotation().Yaw, r->GetActorRotation().Pitch));
+
+		//for disconnecting them from spline	
+		if (r->t >= 1)
+		{
+			r->Fall();
+			RocksToDelete.Add(r);
+		}
 	}
+	for (auto& r : RocksToDelete)
+		ActiveRocks.Remove(r);
 }
 
 void ARockPath::SpawnRock()

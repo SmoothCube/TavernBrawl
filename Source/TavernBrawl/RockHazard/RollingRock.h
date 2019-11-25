@@ -26,10 +26,14 @@ public:
 	UFUNCTION()
 	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	void Fall();
+
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere = nullptr;
 	float t = 0.f;
+
 	UPROPERTY(EditAnywhere)
 	float speed = 0.1f;
+	float degrees = 0.0f;
 
 };
