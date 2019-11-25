@@ -2,22 +2,20 @@
 
 
 #include "BrawlGameMode.h"
-#include "ConfigCacheIni.h"
+#include "Engine/GameInstance.h" 
+#include "BrawlGameInstance.h"
 
 void ABrawlGameMode::BeginPlay()
 {
 
-	UE_LOG(LogTemp, Warning, TEXT("Starting"));
+	UBrawlGameInstance* GameInstance = Cast<UBrawlGameInstance>(GetGameInstance());
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ABrawlGameMode::BeginPlay] Can't find the game instance"));
+		return;
+	}
 
-
-	FString test = "GameMode";
-	GConfig->GetInt(
-		*test,
-		TEXT("NumberOfPlayers"),
-		NumberOfPlayers,
-		GGameIni
-	);
-
-	UE_LOG(LogTemp, Warning, TEXT("%i"), NumberOfPlayers);
+	NumberOfPlayers = GameInstance->NumberOfPlayers;
+	UE_LOG(LogTemp, Warning, TEXT("[ABrawlGameMode::BeginPlay] Jeg kom 2"));
 	Super::BeginPlay();
 }

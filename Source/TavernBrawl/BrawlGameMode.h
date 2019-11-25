@@ -16,10 +16,9 @@ class TAVERNBRAWL_API ABrawlGameMode : public AGameModeBase
 
 public:
 		virtual void BeginPlay() override;
-
 protected:
 
-	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	int32 NumberOfPlayers = 1;
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "C++")
+	int NumberOfPlayers = 2;
 
 };

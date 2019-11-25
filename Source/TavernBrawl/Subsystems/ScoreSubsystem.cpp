@@ -2,19 +2,20 @@
 
 
 #include "ScoreSubsystem.h"
-#include "ConfigCacheIni.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/World.h"
+#include "BrawlGameInstance.h"
 
 void UScoreSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
-	GConfig->LoadFile(GGameIni);
+	UBrawlGameInstance* GameInstance = Cast<UBrawlGameInstance>(UGameplayStatics::GetGameInstance(GetWorld()));
+	if (!GameInstance)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[ABrawlGameMode::BeginPlay] Can't find the game instance"));
+		return;
+	}
 
-	FString test = "GameMode";
-	GConfig->GetInt(
-		*test,
-		TEXT("Health"),
-		Health,
-		GGameIni
-	);
+	Health = GameInstance->Health;
 }
 
 void UScoreSubsystem::Deinitialize()
