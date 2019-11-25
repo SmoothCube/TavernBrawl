@@ -211,6 +211,9 @@ void ABrawlCharacter::GetDamaged()
 		subsystem->DecrementHealth();
 		UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Can't find the playercontroller"), *GetNameSafe(this));
 	}
+	UGameplayStatics::PlaySoundAtLocation(GetWorld(),
+	HitSounds[FMath::RandRange(0, HitSounds.Num() - 1)], GetMesh()->GetComponentLocation(), 1.0f, FMath::FRandRange(0.9f, 1.1f));
+
 }
 
 FRotator ABrawlCharacter::GetPrevRotation()

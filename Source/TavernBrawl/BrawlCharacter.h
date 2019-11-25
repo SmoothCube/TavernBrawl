@@ -8,6 +8,7 @@
 #include "BrawlCharacter.generated.h"
 
 class USphereComponent;
+class USoundBase;
 class ABrawlPlayerController;
 
 UCLASS()
@@ -32,6 +33,9 @@ public:
 	virtual void FellOutOfWorld(const class UDamageType& DmgType) override;
 	void Fall();
 	void GetDamaged();
+
+	UPROPERTY(EditAnywhere, Category="Audio")
+	TArray<USoundBase*> HitSounds;
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
