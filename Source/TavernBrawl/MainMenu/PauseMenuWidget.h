@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "PauseMenu.generated.h"
+#include "PauseMenuWidget.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class TAVERNBRAWL_API UPauseMenu : public UUserWidget
+class TAVERNBRAWL_API UPauseMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
 	
