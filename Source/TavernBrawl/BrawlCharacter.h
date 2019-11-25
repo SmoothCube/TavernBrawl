@@ -31,6 +31,7 @@ public:
 
 	virtual void FellOutOfWorld(const class UDamageType& DmgType) override;
 	void Fall();
+	void GetDamaged();
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);

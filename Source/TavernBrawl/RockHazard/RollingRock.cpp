@@ -7,6 +7,8 @@
 
 #include "BrawlCharacter.h"
 #include "Character/PunchComponent.h"
+#include "Subsystems/ScoreSubsystem.h"
+#include "BrawlPlayerController.h"
 
 // Sets default values
 ARollingRock::ARollingRock()
@@ -40,6 +42,7 @@ void ARollingRock::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ARollingRock::OnOverlapBegin]: %s overlapped!"), *GetNameSafe(this));
 		Player->Fall();
+		Player->GetDamaged();
 	}
 }
 

@@ -49,10 +49,10 @@ private:
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-		float SmallestSpringArmLength = 300.f;
+	float SmallestSpringArmLength = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-		float LargestSpringArmLength = 2500.f;
+	float LargestSpringArmLength = 2500.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	float BorderWidth = 200.0f;

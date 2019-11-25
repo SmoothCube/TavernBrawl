@@ -28,6 +28,7 @@ public:
 
 	void Fall();
 
+
 	UPROPERTY(VisibleAnywhere)
 	USphereComponent* Sphere = nullptr;
 	float t = 0.f;

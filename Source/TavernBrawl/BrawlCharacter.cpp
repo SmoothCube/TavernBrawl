@@ -12,10 +12,12 @@
 #include "Engine/World.h"
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/PlayerStart.h"
+#include "Engine/LocalPlayer.h"
 
 #include "BrawlPlayerController.h"
 #include "Character/PickupComponent.h"
 #include "Character/PunchComponent.h"
+#include "Subsystems/ScoreSubsystem.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -67,7 +69,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	// This is a temporary fix for our casting issue
 	if (!BrawlPlayerController)
 		BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
-
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
@@ -195,6 +196,23 @@ void ABrawlCharacter::GetUp()
 	}
 }
 
+void ABrawlCharacter::GetDamaged()
+{
+	if (BrawlPlayerController)
+	{
+		UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+		BrawlPlayerController->GetLocalPlayer();
+		subsystem->DecrementHealth();
+	}
+	else
+	{
+		ABrawlPlayerController* TempPlayerController = Cast<ABrawlPlayerController>(GetController());
+		UScoreSubsystem* subsystem = TempPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+		subsystem->DecrementHealth();
+		UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Can't find the playercontroller"), *GetNameSafe(this));
+	}
+}
+
 FRotator ABrawlCharacter::GetPrevRotation()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("Actor Rotation: %s"), *PrevRotationVector.Rotation().ToString());
@@ -212,5 +230,8 @@ void ABrawlCharacter::FellOutOfWorld(const UDamageType& DmgType)
 
 	FVector RespawnLoc = Starts[r]->GetActorLocation() + FVector(0.f,0.f,2500.f);
 	SetActorLocation(RespawnLoc,false, &hit, ETeleportType::TeleportPhysics);
+
+	GetDamaged();
+
 
 }

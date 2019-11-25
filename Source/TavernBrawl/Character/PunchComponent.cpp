@@ -104,24 +104,13 @@ void UPunchComponent::GetPunched(FVector InPunchStrength)
 		PunchEnd();
 		Player->Fall();
 		Player->GetMesh()->AddForce(InPunchStrength* PunchStrength, "ProtoPlayer_BIND_Head_JNT_center");
+		Player->GetDamaged();
 	}
 	else
 	{
 
 		Player->GetMovementComponent()->Velocity = InPunchStrength;
 		//Player->FallVector = InPunchStrength;
-	}
-	if (Player->BrawlPlayerController)
-	{
-		UScoreSubsystem* subsystem = Player->BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		subsystem->DecrementHealth();
-	}
-	else
-	{
-		ABrawlPlayerController* TempPlayerController = Cast<ABrawlPlayerController>(Player->GetController());
-		UScoreSubsystem* subsystem = TempPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
-		subsystem->DecrementHealth();
-		UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Can't find the playercontroller"), *GetNameSafe(this));
 	}
 }
 
