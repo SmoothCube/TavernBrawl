@@ -59,6 +59,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float PunchHitVelocityDamper = 0.3f;
 
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	USoundBase* PunchSound = nullptr;
+
 	UFUNCTION()
 	void KillCharacter();
 	

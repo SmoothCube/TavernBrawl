@@ -34,11 +34,15 @@ public:
 	void Fall();
 	void GetDamaged();
 
-	UPROPERTY(EditAnywhere, Category="Audio")
-	TArray<USoundBase*> HitSounds;
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void PlayControllerVibration(float strength);
+
+	//How much you have to tilt the right stick before the character rotates to that direction
+	void HandleMovementInput(float DeltaTime);
+	void HandleRotationInput();
+
+	void GetUp();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	class USphereComponent* PunchSphere = nullptr;
@@ -58,10 +62,6 @@ protected:
 	static const FName RotateForwardBinding;
 	static const FName RotateRightBinding;
 
-	//How much you have to tilt the right stick before the character rotates to that direction
-	void HandleMovementInput(float DeltaTime);
-	void HandleRotationInput();
-	
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float RecoveryTime= 0.5;
 
@@ -80,7 +80,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float TimeBeforeFall = 5.f;  //TODO: find a better name for this, it doesnt have anything to do with time
 
-	void GetUp();
+	UPROPERTY(EditAnywhere, Category = "Audio")
+	TArray<USoundBase*> HitSounds;
+
 
 	FVector FallVector{ 0.f,0.f,0.f };
 	FVector PrevRotationVector{ 1.f,0.f,0.f };

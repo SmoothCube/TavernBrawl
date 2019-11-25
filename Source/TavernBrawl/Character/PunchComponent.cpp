@@ -59,6 +59,8 @@ void UPunchComponent::Punch()
 	float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
 	Player->GetCharacterMovement()->Velocity = Player->PrevRotationVector * Player->GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
 	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if (PunchSound)
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PunchSound, Player->PunchSphere->GetComponentLocation(), 1.0f, FMath::FRandRange(0.9f, 1.1f));
 }
 
 void UPunchComponent::PunchWithItem()
