@@ -15,6 +15,8 @@ class TAVERNBRAWL_API UHealthWidget : public UUserWidget
 	GENERATED_BODY()
 public:
 
+	virtual bool Initialize() override;
+
 	UFUNCTION(BlueprintCallable)
 	void SetupOwnerAndBindEvents(ABrawlPlayerController* inOwner);
 
@@ -28,6 +30,7 @@ private:
 
 	ABrawlPlayerController* Owner = nullptr;
 
+	int32 MaxHealth;
 	float Step = 0.2f;
 	
 };	
