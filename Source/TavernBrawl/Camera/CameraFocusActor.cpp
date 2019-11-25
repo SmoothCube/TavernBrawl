@@ -69,7 +69,6 @@ void ACameraFocusActor::Tick(float DeltaTime)
 
 void ACameraFocusActor::SetSpringArmLength(float distanceToFurthestPlayer)
 {
-	FVector VectorBetweenFurthestPlayers = FVector::ZeroVector;
 	float longestVector = 0.f;
 
 	for (int i = 0; i < Players.Num(); i++)
@@ -93,17 +92,17 @@ void ACameraFocusActor::SetSpringArmLength(float distanceToFurthestPlayer)
 	if (newTargetLength <= SmallestSpringArmLength)
 	{
 		SpringArm->TargetArmLength = SmallestSpringArmLength;
-		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance smaller than smallest! %f"), OffsetX);
+		//UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance smaller than smallest! %f"), OffsetX);
 	}
 	else if (newTargetLength >= LargestSpringArmLength)
 	{
 		SpringArm->TargetArmLength = LargestSpringArmLength;
-		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance larger than largest! %f"), OffsetX);
+		//UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance larger than largest! %f"), OffsetX);
 	}
 	else
 	{
 		SpringArm->TargetArmLength = newTargetLength;
-		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance betweeen smallest and largest! %f	"), OffsetX);
+		//UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance betweeen smallest and largest! %f	"), OffsetX);
 	}
 }
 
