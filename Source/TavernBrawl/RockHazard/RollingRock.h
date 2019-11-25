@@ -32,8 +32,8 @@ public:
 	USphereComponent* Sphere = nullptr;
 	float t = 0.f;
 
-	UPROPERTY(EditAnywhere)
-	float speed = 0.1f;
+	UPROPERTY(EditAnywhere, Category = "Variables")
+	float speed = 0.2f;
 	float degrees = 0.0f;
 
 };
