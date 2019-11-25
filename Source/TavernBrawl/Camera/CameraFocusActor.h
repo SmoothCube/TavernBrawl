@@ -42,6 +42,8 @@ private:
 
 	virtual void Tick(float DeltaTime) override;
 
+	void SetSpringArmLength(float distanceToFurthestPlayer);
+
 
 	TArray<ABrawlCharacter*> Players;
 
@@ -50,5 +52,8 @@ protected:
 		float SmallestSpringArmLength = 300.f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
-	float BorderWidth = 2.0f;
+		float LargestSpringArmLength = 2500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	float BorderWidth = 200.0f;
 };

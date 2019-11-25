@@ -33,7 +33,7 @@ public:
 	float t = 0.f;
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
-	float speed = 0.2f;
+	float speed = 0.15f;
 	float degrees = 0.0f;
 
 };

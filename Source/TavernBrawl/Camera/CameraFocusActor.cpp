@@ -59,17 +59,52 @@ void ACameraFocusActor::Tick(float DeltaTime)
 	}
 	if(Players.Num() != 0)
 		sum /= Players.Num();
+	sum.Z = 0;
+	SetActorLocation(sum);
 
-	if (distanceToFurthestPlayer > SmallestSpringArmLength)
+
+
+	SetSpringArmLength(distanceToFurthestPlayer);
+}
+
+void ACameraFocusActor::SetSpringArmLength(float distanceToFurthestPlayer)
+{
+	FVector VectorBetweenFurthestPlayers = FVector::ZeroVector;
+	float longestVector = 0.f;
+
+	for (int i = 0; i < Players.Num(); i++)
 	{
-	SpringArm->TargetArmLength = distanceToFurthestPlayer * BorderWidth;
+		for (int j = i + 1; j < Players.Num(); j++)
+		{
+			if (Players.IsValidIndex(i) && Players.IsValidIndex(j))
+			{
+				float Temp = FMath::Abs((Players[i]->GetMesh()->GetComponentLocation() - Players[j]->GetMesh()->GetComponentLocation()).X);
+				if (longestVector < Temp)
+					longestVector = Temp;
+			}
+		}
+	}
+	float OffsetX = longestVector;
+	float ActualBorderWidth = BorderWidth + OffsetX;
+
+
+	float newTargetLength = distanceToFurthestPlayer + ActualBorderWidth;
+
+	if (newTargetLength <= SmallestSpringArmLength)
+	{
+		SpringArm->TargetArmLength = SmallestSpringArmLength;
+		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance smaller than smallest! %f"), OffsetX);
+	}
+	else if (newTargetLength >= LargestSpringArmLength)
+	{
+		SpringArm->TargetArmLength = LargestSpringArmLength;
+		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance larger than largest! %f"), OffsetX);
 	}
 	else
 	{
-		SpringArm->TargetArmLength = SmallestSpringArmLength*BorderWidth;
+		SpringArm->TargetArmLength = newTargetLength;
+		UE_LOG(LogTemp, Warning, TEXT("[ACameraFocusActor::Tick] Distance betweeen smallest and largest! %f	"), OffsetX);
 	}
-	sum.Z = 0;
-	SetActorLocation(sum);
 }
 
 void ACameraFocusActor::SetupCamera()
