@@ -68,7 +68,7 @@ void UPickupComponent::PickupHoldingItem()
 	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
 	HoldingItem->Mesh->SetSimulatePhysics(false);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ProtoPlayer_BIND_FingerMid_JNT_right"));
+	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ChairRig_Throwable_JNTSocket"));
 }
 
 void UPickupComponent::StartThrowingItem()
