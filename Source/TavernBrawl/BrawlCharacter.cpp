@@ -70,6 +70,7 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	if (!BrawlPlayerController)
 		BrawlPlayerController = Cast<ABrawlPlayerController>(GetController());
 
+
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
 }

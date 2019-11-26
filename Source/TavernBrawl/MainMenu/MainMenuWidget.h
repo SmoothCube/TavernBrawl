@@ -18,6 +18,4 @@ protected:
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	int32 Health = 4;
 
-	UFUNCTION(BlueprintCallable)
-	void UpdateConfig();
 };

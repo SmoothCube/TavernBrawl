@@ -67,11 +67,18 @@ protected:
 	
 	virtual void BeginPlay() override;
 
+	virtual void TickComponent
+	(
+		float DeltaTime,
+		enum ELevelTick TickType,
+		FActorComponentTickFunction* ThisTickFunction
+	) override;
+
 	void setIsPunchingFalse() { bIsPunching = false; bHasHit = false; }
 
 	ABrawlCharacter* Player = nullptr;
 	bool bIsPunching = false;
-	bool bHasHit= false;
+	bool bHasHit = false;
 	bool bAssignedEvent = false;
 
 	float NormalMaxWalkSpeed = 0.f;

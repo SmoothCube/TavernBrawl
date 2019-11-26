@@ -16,6 +16,5 @@ void ABrawlGameMode::BeginPlay()
 	}
 
 	NumberOfPlayers = GameInstance->NumberOfPlayers;
-	UE_LOG(LogTemp, Warning, TEXT("[ABrawlGameMode::BeginPlay] Jeg kom 2"));
 	Super::BeginPlay();
 }

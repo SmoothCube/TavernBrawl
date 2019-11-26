@@ -18,20 +18,26 @@
 
 UPunchComponent::UPunchComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UPunchComponent::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+void UPunchComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
 	Player = Cast<ABrawlCharacter>(GetOwner());
 	if (Player->BrawlPlayerController && !bAssignedEvent)
 	{
 		bAssignedEvent = true;
 		UScoreSubsystem* subsystem = Player->BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
 		subsystem->OnZeroHealth.AddDynamic(this, &UPunchComponent::KillCharacter);
+		UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::BeginPlay]: %s OnZeroHealth bound!"), *GetNameSafe(this));
+		NormalMaxWalkSpeed = Player->GetCharacterMovement()->MaxWalkSpeed;
 	}
-	NormalMaxWalkSpeed = Player->GetCharacterMovement()->MaxWalkSpeed;
 }
 
 void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
