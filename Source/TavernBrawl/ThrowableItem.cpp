@@ -4,6 +4,7 @@
 #include "ThrowableItem.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "BrawlCharacter.h"
 
 // Sets default values
 AThrowableItem::AThrowableItem()
@@ -13,14 +14,38 @@ AThrowableItem::AThrowableItem()
 
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>("Mesh");
 	RootComponent = Mesh;
+	PunchCapsule = CreateDefaultSubobject<UCapsuleComponent>("PunchCapsule");
+	PunchCapsule->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void AThrowableItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	PunchCapsule->OnComponentBeginOverlap.AddDynamic(this, &AThrowableItem::OnOverlapBegin);
+	PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
+
+void AThrowableItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ABrawlCharacter* Player = Cast<ABrawlCharacter>(OtherActor);
+	if (Player && OtherComp->IsA(UCapsuleComponent::StaticClass()) && Player != HoldingPlayer)
+	{
+		Player->Fall();
+		Player->GetDamaged();
+	}
+}
+
+void AThrowableItem::SetHoldingPlayer(ABrawlCharacter* newPlayer)
+{
+	HoldingPlayer = newPlayer;
+}
+
+ABrawlCharacter* AThrowableItem::GetHoldingPlayer()
+{
+	return HoldingPlayer;
+}
+
 
 // Called every frame
 void AThrowableItem::Tick(float DeltaTime)

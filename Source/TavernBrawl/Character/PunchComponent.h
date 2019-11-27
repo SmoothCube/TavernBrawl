@@ -31,6 +31,9 @@ public:
 	void PunchWithItem();
 
 	UFUNCTION(BlueprintCallable)
+	void PunchWithItemEnd();
+
+	UFUNCTION(BlueprintCallable)
 	bool IsPunching() { return bIsPunching; }
 	
 	UFUNCTION(BlueprintCallable)

@@ -44,7 +44,9 @@ void UPickupComponent::ReleaseHoldingItem()
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HoldingItem->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HoldingItem->Mesh->SetSimulatePhysics(true);
+	HoldingItem->SetHoldingPlayer(nullptr);
 	HoldingItem = nullptr;
 }
 
@@ -69,11 +71,17 @@ void UPickupComponent::PickupHoldingItem()
 	HoldingItem->Mesh->SetSimulatePhysics(false);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	HoldingItem->AttachToComponent(Cast<USceneComponent>(Player->GetMesh()), rules, FName("ChairRig_Throwable_JNTSocket"));
+	HoldingItem->SetHoldingPlayer(Player);
 }
 
 void UPickupComponent::StartThrowingItem()
 {
 	bIsAiming = true;
+}
+
+AThrowableItem* UPickupComponent::GetHoldingItem()
+{
+	return HoldingItem;
 }
 
 void UPickupComponent::ThrowHoldingItem()
@@ -85,8 +93,10 @@ void UPickupComponent::ThrowHoldingItem()
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HoldingItem->Mesh->SetSimulatePhysics(true);
 	HoldingItem->Mesh->AddImpulse(Player->GetActorForwardVector() * 50000);
+	HoldingItem->SetHoldingPlayer(nullptr);
 	HoldingItem = nullptr;
 	bIsAiming = false;
+
 
 }
 

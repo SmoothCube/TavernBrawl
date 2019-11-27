@@ -8,6 +8,7 @@
 
 class UStaticMeshComponent;
 class UCapsuleComponent;
+class ABrawlCharacter;
 
 UCLASS()
 class TAVERNBRAWL_API AThrowableItem : public AActor
@@ -21,10 +22,23 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UStaticMeshComponent* Mesh = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* PunchCapsule = nullptr;
+
+	UFUNCTION()
+	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void SetHoldingPlayer(ABrawlCharacter* newPlayer);
+
+	ABrawlCharacter* GetHoldingPlayer();
+
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
+
+	ABrawlCharacter* HoldingPlayer = nullptr;
+
 
 };
