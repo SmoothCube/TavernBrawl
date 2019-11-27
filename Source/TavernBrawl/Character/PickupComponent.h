@@ -43,12 +43,15 @@ public:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	UPROPERTY(EditAnywhere)
+	float ThrowImpulse = 75000;
 private:
 	
 	virtual void BeginPlay() override;
 	TArray<AThrowableItem*> ItemsInRange;
 	AThrowableItem* HoldingItem = nullptr;
 	ABrawlCharacter* Player = nullptr;
+
 
 	bool bIsAiming = false;
 };
