@@ -18,6 +18,7 @@
 #include "Character/PickupComponent.h"
 #include "Character/PunchComponent.h"
 #include "Subsystems/ScoreSubsystem.h"
+#include "ThrowableItem.h"
 
 const FName ABrawlCharacter::MoveForwardBinding("MoveForward");
 const FName ABrawlCharacter::MoveRightBinding("MoveRight");
@@ -176,6 +177,11 @@ void ABrawlCharacter::Fall()
 	GetMovementComponent()->Velocity = FVector(0);
 	GetMovementComponent()->StopMovementImmediately();
 	FallVector = FVector(0);
+
+	if (PickupComponent->IsHoldingItem())
+	{
+		PickupComponent->ReleaseHoldingItem();
+	}
 }
 
 void ABrawlCharacter::GetUp()

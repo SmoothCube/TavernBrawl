@@ -23,6 +23,8 @@ public:
 	void PickupHoldingItem();
 	void StartThrowingItem();
 
+	AThrowableItem* GetHoldingItem();
+
 	UFUNCTION()
 	void ReleaseHoldingItem();
 

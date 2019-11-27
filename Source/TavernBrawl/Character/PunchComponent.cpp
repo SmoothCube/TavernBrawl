@@ -5,16 +5,18 @@
 #include "Engine/World.h"
 #include "Components/SphereComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Subsystems/ScoreSubsystem.h"
 #include "Engine/LocalPlayer.h"
 #include "TimerManager.h"
-#include "Components/CapsuleComponent.h"
 
 #include "BrawlCharacter.h"
 #include "BrawlPlayerController.h"
 #include "Camera/CameraFocusActor.h"
+#include "PickupComponent.h"
+#include "ThrowableItem.h"
 
 UPunchComponent::UPunchComponent()
 {
@@ -72,6 +74,18 @@ void UPunchComponent::Punch()
 void UPunchComponent::PunchWithItem()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItem]: %s punching!"), *GetNameSafe(this));
+	Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+}
+
+void UPunchComponent::PunchWithItemEnd()
+{
+	Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorld()->GetTimerManager().SetTimer(
+		TH_PunchAgainHandle,
+		this,
+		&UPunchComponent::setIsPunchingFalse,
+		PunchWaitingTime,
+		false);
 }
 
 void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
