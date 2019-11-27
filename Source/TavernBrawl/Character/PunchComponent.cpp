@@ -138,7 +138,6 @@ void UPunchComponent::GetPunched(FVector InPunchStrength)
 	}
 	else
 	{
-
 		Player->GetMovementComponent()->Velocity = InPunchStrength;
 		//Player->FallVector = InPunchStrength;
 	}
@@ -146,7 +145,7 @@ void UPunchComponent::GetPunched(FVector InPunchStrength)
 
 void UPunchComponent::KillCharacter()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::KillCharacter] %s is killed"), *GetNameSafe(this));
+	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::KillCharacter] %s is killed"), *GetNameSafe(Player));
 	Player->bIsDead = true;
 	TArray<AActor*> OutActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACameraFocusActor::StaticClass(), OutActors);
