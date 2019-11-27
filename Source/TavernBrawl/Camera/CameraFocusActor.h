@@ -36,6 +36,11 @@ public:
 	UFUNCTION()
 		void RemovePlayer(ABrawlCharacter* Player);
 
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FVictory, ABrawlCharacter*, PlayerWon);
+
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = Events)
+		FVictory OnVictory;
+
 private:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

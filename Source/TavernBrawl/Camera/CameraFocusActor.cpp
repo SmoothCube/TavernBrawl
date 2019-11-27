@@ -127,4 +127,6 @@ void ACameraFocusActor::SetupCamera()
 void ACameraFocusActor::RemovePlayer(ABrawlCharacter* Player)
 {
 	Players.Remove(Player);
+	if (Players.Num() == 1)
+		OnVictory.Broadcast(Players[0]);
 }
