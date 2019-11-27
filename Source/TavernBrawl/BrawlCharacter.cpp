@@ -65,6 +65,9 @@ void ABrawlCharacter::BeginPlay()
 // Called every frame
 void ABrawlCharacter::Tick(float DeltaTime)
 {
+	if (bIsDead)
+		return;
+
 	Super::Tick(DeltaTime);
 
 	// This is a temporary fix for our casting issue
@@ -231,11 +234,24 @@ FRotator ABrawlCharacter::GetPrevRotation()
 
 void ABrawlCharacter::FellOutOfWorld(const UDamageType& DmgType)
 {
+	
+	UScoreSubsystem* subsystem = BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
+	if (subsystem->GetHealth() == 1)
+	{
+		GetDamaged();
+		return;
+	}
+	else if (subsystem->GetHealth() == 0)
+	{
+		return;
+	}
+
 	UE_LOG(LogTemp, Warning, TEXT("[ABrawlCharacter::FellOutOFWorld]: %s Fell Out Of World!"), *GetNameSafe(this));
+
 	GetMovementComponent()->Velocity = FVector(0, 0, GetMovementComponent()->Velocity.Z);
 	FHitResult hit;
 	TArray<AActor*> Starts;
-		TArray<AActor*> Players;
+	TArray<AActor*> Players;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABrawlCharacter::StaticClass(), Players);
 	Players.Remove(this);
