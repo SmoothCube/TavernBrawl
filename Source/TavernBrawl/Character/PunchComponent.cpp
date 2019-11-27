@@ -73,12 +73,20 @@ void UPunchComponent::Punch()
 
 void UPunchComponent::PunchWithItem()
 {
-	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItem]: %s punching!"), *GetNameSafe(this));
-	Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+
+	if (Player->PickupComponent->GetHoldingItem())
+	{
+		Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("[UPunchComponent::PunchWithItem]: %s not holding item!"), *GetNameSafe(this));
+	}
 }
 
 void UPunchComponent::PunchWithItemEnd()
 {
+	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItemEnd]: %s punching!"), *GetNameSafe(this));
 	Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorld()->GetTimerManager().SetTimer(
 		TH_PunchAgainHandle,
