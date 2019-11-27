@@ -229,13 +229,34 @@ void ABrawlCharacter::FellOutOfWorld(const UDamageType& DmgType)
 	GetMovementComponent()->Velocity = FVector(0, 0, GetMovementComponent()->Velocity.Z);
 	FHitResult hit;
 	TArray<AActor*> Starts;
+		TArray<AActor*> Players;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APlayerStart::StaticClass(), Starts);
-	int r = FMath::RandRange(0, Starts.Num()-1);
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ABrawlCharacter::StaticClass(), Players);
+	Players.Remove(this);
+	float furthestDistance = 0;
+	AActor* furthestSpawn = nullptr;
+	for (auto& s : Starts)
+	{
+		float furthestPlayerDistance = 0;
+		for (auto& p : Players)
+		{
+			float dist = FVector::Distance(s->GetActorLocation(), p->GetActorLocation());
+			if (dist > furthestPlayerDistance)
+			{
+				furthestPlayerDistance = dist;
+			}
+		}
+		if (furthestPlayerDistance > furthestDistance)
+		{
+			furthestSpawn = s;
+			furthestDistance = furthestPlayerDistance;
+		}
+	}
+	
 
-	FVector RespawnLoc = Starts[r]->GetActorLocation() + FVector(0.f,0.f,2500.f);
+	FVector RespawnLoc = furthestSpawn->GetActorLocation() + FVector(0.f,0.f,2500.f);
 	SetActorLocation(RespawnLoc,false, &hit, ETeleportType::TeleportPhysics);
 
 	GetDamaged();
-
 
 }
