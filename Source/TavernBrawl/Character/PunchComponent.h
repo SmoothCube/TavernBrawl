@@ -38,6 +38,9 @@ public:
 	
 	UFUNCTION(BlueprintCallable)
 	void PunchEnd();
+
+	UFUNCTION(BlueprintCallable)
+	void GetPunched(FVector punchStrength);
 protected:	
 
 
@@ -46,9 +49,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Variables")
 	float PunchWaitingTime = 0.1;
-
-	UFUNCTION(BlueprintCallable)
-	void GetPunched(FVector punchStrength);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Variables")
 	UCurveFloat* DashLengthCurve;

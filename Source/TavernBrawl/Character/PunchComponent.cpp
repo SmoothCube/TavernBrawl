@@ -47,11 +47,11 @@ void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 	ABrawlCharacter* OtherPlayer = Cast<ABrawlCharacter>(OtherActor);
 	UCapsuleComponent* Capsule = Cast<UCapsuleComponent>(OtherComp);
 	
-	
 	if (!bHasHit && OtherActor != GetOwner() && OtherPlayer != nullptr && Capsule != nullptr)
 	{
 		PunchHit(OtherPlayer);
 	}
+	
 }
 
 void UPunchComponent::PunchButtonPressed()

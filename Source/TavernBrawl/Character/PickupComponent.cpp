@@ -90,9 +90,9 @@ void UPickupComponent::ThrowHoldingItem()
 
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
-	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	HoldingItem->Mesh->SetSimulatePhysics(true);
-	HoldingItem->Mesh->AddImpulse(Player->GetActorForwardVector() * 50000);
+	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HoldingItem->Mesh->AddImpulse(Player->GetActorForwardVector() * ThrowImpulse);
 	HoldingItem->SetHoldingPlayer(nullptr);
 	HoldingItem = nullptr;
 	bIsAiming = false;
