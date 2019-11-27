@@ -4,6 +4,7 @@
 #include "RollingRock.h"
 
 #include "Components/SphereComponent.h"
+#include "Components/CapsuleComponent.h"
 
 #include "BrawlCharacter.h"
 #include "Character/PunchComponent.h"
@@ -38,7 +39,8 @@ void ARollingRock::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* O
 {
 	ABrawlCharacter* Player = nullptr;
 	Player= Cast<ABrawlCharacter>(OtherActor);
-	if (Player)
+
+	if (Player && OtherComp->IsA<UCapsuleComponent>())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("[ARollingRock::OnOverlapBegin]: %s overlapped!"), *GetNameSafe(this));
 		Player->Fall();
