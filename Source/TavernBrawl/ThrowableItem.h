@@ -25,13 +25,25 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* PunchCapsule = nullptr;
 
+	UPROPERTY(VisibleAnywhere)
+	UCapsuleComponent* ThrowCapsule = nullptr;
+
 	UFUNCTION()
-	void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void OnPunchOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void OnThrowOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void SetHoldingPlayer(ABrawlCharacter* newPlayer);
 
 	ABrawlCharacter* GetHoldingPlayer();
 
+	void SetThrowCollisionDisabled();
+
+	FTimerHandle TH_ThrowHandle;
+
+	UPROPERTY(EditDefaultsOnly)
+		float ThrowTimer = 5.f;
 
 protected:
 	// Called when the game starts or when spawned
@@ -40,5 +52,9 @@ protected:
 
 	ABrawlCharacter* HoldingPlayer = nullptr;
 
+	UPROPERTY(EditDefaultsOnly)
+		float MinFallSpeed = 100.f;
 
+
+	
 };

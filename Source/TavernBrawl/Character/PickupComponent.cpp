@@ -6,6 +6,8 @@
 #include "BrawlCharacter.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 
 
 // Sets default values for this component's properties
@@ -92,10 +94,21 @@ void UPickupComponent::ThrowHoldingItem()
 	HoldingItem->DetachFromActor(rules);
 	HoldingItem->Mesh->SetSimulatePhysics(true);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	HoldingItem->ThrowCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 	HoldingItem->Mesh->AddImpulse(Player->GetActorForwardVector() * ThrowImpulse);
+
+	GetWorld()->GetTimerManager().SetTimer(
+		HoldingItem->TH_ThrowHandle,
+		HoldingItem,
+		&AThrowableItem::SetThrowCollisionDisabled,
+		HoldingItem->ThrowTimer,
+		false);
+
 	HoldingItem->SetHoldingPlayer(nullptr);
 	HoldingItem = nullptr;
 	bIsAiming = false;
+
+
 
 
 }

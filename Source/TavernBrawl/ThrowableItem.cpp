@@ -16,23 +16,47 @@ AThrowableItem::AThrowableItem()
 	RootComponent = Mesh;
 	PunchCapsule = CreateDefaultSubobject<UCapsuleComponent>("PunchCapsule");
 	PunchCapsule->SetupAttachment(RootComponent);
+	ThrowCapsule = CreateDefaultSubobject<UCapsuleComponent>("ThrowCapsule");
+	ThrowCapsule->SetupAttachment(RootComponent);
+
+
 }
 
 // Called when the game starts or when spawned
 void AThrowableItem::BeginPlay()
 {
 	Super::BeginPlay();
-	PunchCapsule->OnComponentBeginOverlap.AddDynamic(this, &AThrowableItem::OnOverlapBegin);
+	PunchCapsule->OnComponentBeginOverlap.AddDynamic(this, &AThrowableItem::OnPunchOverlapBegin);
+	ThrowCapsule->OnComponentBeginOverlap.AddDynamic(this, &AThrowableItem::OnThrowOverlapBegin);
 	PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ThrowCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
-void AThrowableItem::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AThrowableItem::OnPunchOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("[AThrowableItem::OnPunchOverlapBegin] %s overlapped"), *GetNameSafe(this));
 	ABrawlCharacter* Player = Cast<ABrawlCharacter>(OtherActor);
 	if (Player && OtherComp->IsA(UCapsuleComponent::StaticClass()) && Player != HoldingPlayer)
 	{
 		Player->Fall();
 		Player->GetDamaged();
+	}
+}
+
+void AThrowableItem::OnThrowOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("[AThrowableItem::OnThrowOverlapBegin] %s overlapped with %s"), *GetNameSafe(this), *GetNameSafe(OtherActor));
+	//ThrowCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ABrawlCharacter* Player = Cast<ABrawlCharacter>(OtherActor);
+	if (Player && OtherComp->IsA(UCapsuleComponent::StaticClass()) && Player != HoldingPlayer)
+	{
+		if (GetVelocity().Size() >= MinFallSpeed)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("[AThrowableItem::OnThrowOverlapBegin] %s Falling"), *GetNameSafe(OtherActor));
+			Player->Fall();
+			Player->GetDamaged();
+		}
+			ThrowCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
@@ -52,5 +76,10 @@ void AThrowableItem::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void AThrowableItem::SetThrowCollisionDisabled()
+{
+	ThrowCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
