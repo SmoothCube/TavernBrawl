@@ -87,7 +87,8 @@ void UPunchComponent::PunchWithItem()
 void UPunchComponent::PunchWithItemEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItemEnd]: %s punching!"), *GetNameSafe(this));
-	Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	if(Player->PickupComponent->IsHoldingItem())
+		Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorld()->GetTimerManager().SetTimer(
 		TH_PunchAgainHandle,
 		this,
