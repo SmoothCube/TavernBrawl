@@ -59,10 +59,13 @@ void ACameraFocusActor::Tick(float DeltaTime)
 	}
 	if(Players.Num() != 0)
 		sum /= Players.Num();
-	sum.Z = 0;
+
+	if (sum.Z < MinCameraHeight)
+		sum.Z = MinCameraHeight;
+	else if (sum.Z > MaxCameraHeight)
+		sum.Z = MaxCameraHeight;
+
 	SetActorLocation(sum);
-
-
 
 	SetSpringArmLength(distanceToFurthestPlayer);
 }

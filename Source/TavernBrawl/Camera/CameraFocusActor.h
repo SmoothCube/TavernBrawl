@@ -61,4 +61,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
 	float BorderWidth = 200.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	float MaxCameraHeight = 500.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Variables")
+	float MinCameraHeight = 0.f;
 };
