@@ -69,7 +69,6 @@ void ABrawlCharacter::Tick(float DeltaTime)
 	if (bIsDead)
 		return;
 
-	Super::Tick(DeltaTime);
 
 	// This is a temporary fix for our casting issue
 	if (!BrawlPlayerController)
@@ -78,6 +77,9 @@ void ABrawlCharacter::Tick(float DeltaTime)
 
 	HandleMovementInput(DeltaTime);
 	HandleRotationInput();
+
+	Super::Tick(DeltaTime);
+
 }
 
 USphereComponent* ABrawlCharacter::GetPunchSphere()

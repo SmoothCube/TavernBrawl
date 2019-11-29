@@ -5,6 +5,7 @@
 
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "BrawlCharacter.h"
 #include "Character/PunchComponent.h"
@@ -26,6 +27,7 @@ void ARollingRock::BeginPlay()
 	Super::BeginPlay();
 
 	Sphere->OnComponentBeginOverlap.AddDynamic(this, &ARollingRock::OnOverlapBegin);
+
 }
 
 // Called every frame
