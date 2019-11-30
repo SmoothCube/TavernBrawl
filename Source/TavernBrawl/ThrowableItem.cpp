@@ -62,6 +62,7 @@ void AThrowableItem::OnThrowOverlapBegin(UPrimitiveComponent* OverlappedComp, AA
 
 void AThrowableItem::SetHoldingPlayer(ABrawlCharacter* newPlayer)
 {
+	if(newPlayer)
 	HoldingPlayer = newPlayer;
 }
 
