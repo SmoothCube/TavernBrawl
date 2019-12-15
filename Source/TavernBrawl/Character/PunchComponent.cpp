@@ -32,7 +32,7 @@ void UPunchComponent::BeginPlay()
 void UPunchComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Player = Cast<ABrawlCharacter>(GetOwner());
-	if (Player->BrawlPlayerController && !bAssignedEvent)
+	if (Player && Player->BrawlPlayerController && !bAssignedEvent)
 	{
 		bAssignedEvent = true;
 		UScoreSubsystem* subsystem = Player->BrawlPlayerController->GetLocalPlayer()->GetSubsystem<UScoreSubsystem>();
@@ -56,7 +56,7 @@ void UPunchComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor
 
 void UPunchComponent::PunchButtonPressed()
 {
-	if (!Player->bHasFallen && !bIsPunching && !Player->GetMovementComponent()->IsFalling())
+	if (Player && !Player->bHasFallen && !bIsPunching && !Player->GetMovementComponent()->IsFalling())
 	{
 		bIsPunching = true;
 	}
@@ -64,16 +64,21 @@ void UPunchComponent::PunchButtonPressed()
 
 void UPunchComponent::Punch()
 {
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::Punch]: %s No Player found for PunchComponent!"), *GetNameSafe(this)); return; }
 	float f = FVector::DotProduct(Player->PrevRotationVector.GetSafeNormal(), Player->GetCharacterMovement()->Velocity.GetSafeNormal());
 	Player->GetCharacterMovement()->Velocity = Player->PrevRotationVector * Player->GetCharacterMovement()->Velocity.Size() * DashLengthCurve->GetFloatValue(f);
-	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	if(Player->GetPunchSphere())
+		Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	else
+		UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::Punch]: %s No PunchSphere found for player !"), *GetNameSafe(Player));
 	if (PunchSound)
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PunchSound, Player->PunchSphere->GetComponentLocation(), 1.0f, FMath::FRandRange(0.9f, 1.1f));
 }
 
 void UPunchComponent::PunchWithItem()
 {
-
+	if (!Player) { UE_LOG(LogTemp, Error, TEXT("[UPunchComponent::PunchWithItem]: %s No Player For PunchComponent!"), *GetNameSafe(this)); return; }
+	if (!Player->PickupComponent) {UE_LOG(LogTemp, Error, TEXT("[UPunchComponent::PunchWithItem]: No PickupComponent for player %s!"), *GetNameSafe(Player)); return;}
 	if (Player->PickupComponent->GetHoldingItem())
 	{
 		Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
@@ -87,6 +92,8 @@ void UPunchComponent::PunchWithItem()
 void UPunchComponent::PunchWithItemEnd()
 {
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItemEnd]: %s punching!"), *GetNameSafe(this));
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItemEnd]: %s No Player!"), *GetNameSafe(this)); }
+	if(!Player->PickupComponent) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchWithItemEnd]: No PickupComponent for Player %s !"), *GetNameSafe(Player)); }
 	if(Player->PickupComponent->IsHoldingItem())
 		Player->PickupComponent->GetHoldingItem()->PunchCapsule->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorld()->GetTimerManager().SetTimer(
@@ -100,6 +107,10 @@ void UPunchComponent::PunchWithItemEnd()
 void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
 {
 	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::OnPunchSphereOverlapBegin] Sphere Overlapped! Other Actor: %s"), *GetNameSafe(OtherActor));
+	if (!OtherPlayer) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchHit]: %s No OtherPlayer found!"), *GetNameSafe(this)); return; }
+	if (!OtherPlayer->PunchComponent) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchHit]: No PunchComponent found for OtherPlayer %s!"), *GetNameSafe(OtherPlayer)); return; }
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchHit]: No Player found for PunchComponent %s!"), *GetNameSafe(this)); return; }
+
 	OtherPlayer->PunchComponent->GetPunched(Player->GetVelocity());
 	Player->CurrentFallTimer = 0.f;
 	Player->GetMovementComponent()->Velocity *= PunchHitVelocityDamper;
@@ -111,6 +122,8 @@ void UPunchComponent::PunchHit(ABrawlCharacter* OtherPlayer)
 
 void UPunchComponent::PunchEnd()
 {
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchEnd]: No Player found for PunchComponent %s!"), *GetNameSafe(this)); return; }
+
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::PunchEnd] Player Punch End: %s"), *GetNameSafe(this));
 	Player->GetPunchSphere()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	Player->GetCharacterMovement()->MaxWalkSpeed = NormalMaxWalkSpeed;
@@ -126,6 +139,8 @@ void UPunchComponent::PunchEnd()
 
 void UPunchComponent::GetPunched(FVector InPunchStrength)
 {
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched]: No Player found for PunchComponent %s!"), *GetNameSafe(this)); return; }
+
 	//UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched] %s Got Punched "), *GetNameSafe(this));
 	float strength = InPunchStrength.Size();
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::GetPunched]: punch strength: %f"), strength)
@@ -146,6 +161,8 @@ void UPunchComponent::GetPunched(FVector InPunchStrength)
 
 void UPunchComponent::KillCharacter()
 {
+	if (!Player) { UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::KillCharacter]: No Player found for PunchComponent %s!"), *GetNameSafe(this)); return; }
+
 	UE_LOG(LogTemp, Warning, TEXT("[UPunchComponent::KillCharacter] %s is killed"), *GetNameSafe(Player));
 	Player->bIsDead = true;
 	TArray<AActor*> OutActors;

@@ -84,6 +84,11 @@ void ABrawlCharacter::Tick(float DeltaTime)
 
 USphereComponent* ABrawlCharacter::GetPunchSphere()
 {
+	if (!PunchSphere)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[ABrawlCharacter::GetPunchSphere] No PunchSphere for player %s"), *GetNameSafe(this));
+		return nullptr;
+	}
 	return PunchSphere;
 }
 

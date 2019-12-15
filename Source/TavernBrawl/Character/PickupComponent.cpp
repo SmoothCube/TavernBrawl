@@ -42,7 +42,10 @@ void UPickupComponent::OnPickupOrThrowTrigger()
 
 void UPickupComponent::ReleaseHoldingItem()
 {
-	if (!HoldingItem) return;
+	if (!HoldingItem) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ReleaseHoldingItem]: No Holding Item! %s!"), *GetNameSafe(this)); return; }
+	if (!HoldingItem->Mesh) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ReleaseHoldingItem]: No Mesh For HoldingItem! %s!"), *GetNameSafe(HoldingItem)); return; }
+	if (!HoldingItem->PunchCapsule) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ReleaseHoldingItem]: No PunchCapsule For HoldingItem! %s!"), *GetNameSafe(HoldingItem)); return; }
+	if (!IsValid(HoldingItem)) { UE_LOG(LogTemp, Error, TEXT("[UPickupComponent::PickupHoldingItem]: HoldingItem Is Not Valid! %s!"), *GetNameSafe(this)); return; }
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
@@ -68,7 +71,13 @@ void UPickupComponent::PickupHoldingItem()
 
 	HoldingItem = ItemsInRange[0];
 
-	UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::OnPickupSphereOverlapBegin] %s is overlapping with %s"), *GetNameSafe(HoldingItem), *GetNameSafe(this));
+	if (!HoldingItem) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::PickupHoldingItem]: No Holding Item! %s!"), *GetNameSafe(this)); return; }
+	if (!HoldingItem->Mesh) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::PickupHoldingItem]: No Mesh For HoldingItem! %s!"), *GetNameSafe(HoldingItem)); return; }
+	if( !IsValid(HoldingItem)) { UE_LOG(LogTemp, Error, TEXT("[UPickupComponent::PickupHoldingItem]: HoldingItem Is Not Valid! %s!"), *GetNameSafe(this)); return;  }
+	if (GetNameSafe(HoldingItem) == "None") { UE_LOG(LogTemp, Error, TEXT("[UPickupComponent::PickupHoldingItem]: HoldingItem Is None! %s!"), *GetNameSafe(this)); return; }
+	UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::PickupHoldingItem] %s is overlapping with %s"), *GetNameSafe(HoldingItem), *GetNameSafe(this));
+	
+	
 	FAttachmentTransformRules rules(EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, EAttachmentRule::SnapToTarget, false);
 	HoldingItem->Mesh->SetSimulatePhysics(false);
 	HoldingItem->Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -83,12 +92,21 @@ void UPickupComponent::StartThrowingItem()
 
 AThrowableItem* UPickupComponent::GetHoldingItem()
 {
+	if (!HoldingItem) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::GetHoldingItem]: No Holding Item! %s!"), *GetNameSafe(this));
+		return nullptr;
+	}
 	return HoldingItem;
+
 }
 
 void UPickupComponent::ThrowHoldingItem()
 {
-	if (!HoldingItem) return;
+	if (!HoldingItem) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ThrowHoldingItem]: No Holding Item! %s!"), *GetNameSafe(this)); return; }
+	if (!HoldingItem->Mesh) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ThrowHoldingItem]: No Mesh For HoldingItem! %s!"), *GetNameSafe(HoldingItem)); return; }
+	if (!HoldingItem->ThrowCapsule) { UE_LOG(LogTemp, Warning, TEXT("[UPickupComponent::ThrowHoldingItem]: No ThrowCapsule For HoldingItem! %s!"), *GetNameSafe(HoldingItem)); return; }
+	if (!IsValid(HoldingItem)) { UE_LOG(LogTemp, Error, TEXT("[UPickupComponent::PickupHoldingItem]: HoldingItem Is Not Valid! %s!"), *GetNameSafe(this)); return; }
 
 	FDetachmentTransformRules rules(EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, EDetachmentRule::KeepWorld, true);
 	HoldingItem->DetachFromActor(rules);
@@ -127,7 +145,6 @@ bool UPickupComponent::IsAiming()
 
 void UPickupComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (HoldingItem) return;
 	AThrowableItem* Item = Cast<AThrowableItem>(OtherActor);
 	if (!Item) return;
 	ItemsInRange.Add(Item);
@@ -135,7 +152,6 @@ void UPickupComponent::OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActo
 }
 void UPickupComponent::OnOverlapEnd(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	if (HoldingItem) return;
 	AThrowableItem* Item = Cast<AThrowableItem>(OtherActor);
 	if (!Item) return;
 	ItemsInRange.Remove(Item);
